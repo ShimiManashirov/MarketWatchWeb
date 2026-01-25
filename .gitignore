@@ -35,3 +35,19 @@ coverage/
 # Uploads (if you want to exclude user-uploaded files)
 src/uploads/*
 !src/uploads/.gitkeep
+
+# Documentation files (generated)
+*_SUMMARY.md
+*_DESCRIPTION.md
+*_STATUS.md
+*_COMPLETE.md
+*_MISSING.md
+*_FIXED.md
+WHAT_IS_MISSING.md
+BACKEND_STATUS.md
+COMPLETION_STATUS.md
+PROJECT_REQUIREMENTS_CHECK.md
+OAUTH_SETUP.md
+OAUTH_COMPLETE.md
+PAGINATION_COMPLETE.md
+CLEANUP_SUMMARY.md
