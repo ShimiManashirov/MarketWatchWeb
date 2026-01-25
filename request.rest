@@ -3,9 +3,9 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "username": "shimi",
-    "email": "shimi@example.com",
-    "password": "password123"
+    "username": "newuser",
+    "email": "newuser@example.com",
+    "password": "pass123"
 }
 
 ### Login
@@ -14,8 +14,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "email": "shimi@example.com",
-    "password": "password123"
+    "username": "newuser",
+    "password": "pass123"
 }
 
 ### Variables from login response
@@ -32,28 +32,58 @@ Content-Type: application/json
 
 ### Protected Route Test (Example)
 GET http://localhost:3000/auth/test-protected
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{login.response.body.accessToken}}
 
 
 ### Variables (Update after Login)
-@accessToken = YOUR_ACCESS_TOKEN_HERE
+# If you need to set a token manually, replace the value below. Otherwise the requests use the `login` response token.
+# @accessToken = YOUR_ACCESS_TOKEN_HERE
 
-### Update Profile with Image
-# Note: Ensure the file 'test_image.png' exists in the same folder as this .rest file
+### Update Profile with Image (use curl)
+# Note: Ensure the file `test_image.png` exists in the project root.
+# It's important NOT to set the multipart `Content-Type` header manually — let the client/curl set it.
+
+# Quick curl test (recommended):
+```bash
+TOKEN=$(curl -s -X POST -H "Content-Type: application/json" \
+    -d '{"username":"newuser","password":"pass123"}' \
+    http://localhost:3000/auth/login | node -e "const s=require('fs').readFileSync(0,'utf8'); try{console.log(JSON.parse(s).accessToken||'')}catch{console.log('')}")
+
+curl -v -X PUT "http://localhost:3000/user/update" \
+    -H "Authorization: Bearer $TOKEN" \
+    -F "username=newuser_updated" \
+    -F "image=@test_image.png"
+```
+
+# REST client note: remove manual `Content-Type` and boundary lines — use your client's file-upload UI or the curl command above.
+### Update Profile with Image (REST Client / Postman / Thunder Client)
+# Use your REST client's form-data mode (don't set Content-Type manually):
+# - Key: `username`  Type: Text  Value: `newuser_updated`
+# - Key: `image`     Type: File  Select: `test_image.png` (from project root)
+# Add header `Authorization: Bearer {{login.response.body.accessToken}}` (or paste token)
+# Then send `PUT http://localhost:3000/user/update`.
+
+### Update Profile with Image URL (JSON)
+# Send a JSON body with `imageUrl` instead of uploading a file.
 PUT http://localhost:3000/user/update
-Authorization: Bearer {{accessToken}}
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="username"
+{
+    "username": "newuser_updated",
+    "imageUrl": "https://example.com/path/to/image.png"
+}
 
-shimi_updated
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="test_image.png"
-Content-Type: image/png
-
-< ./test_image.png
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ### Get User Profile
 GET http://localhost:3000/user/profile
-Authorization: Bearer {{accessToken}}  
+Authorization: Bearer {{login.response.body.accessToken}} 
+
+
+###update Profile with Image (REST Client / Postman / Thunder Client)
+# Use your REST client's form-data mode (don't set Content-Type manually):
+# - Key: `username`  Type: Text  Value: `newuser_updated`
+# - Key: `image`     Type: File  Select: `test_image.png`
+# Add header `Authorization: Bearer {{accessToken}}` (or paste token)
+# Then send `PUT http://localhost:3000/user/update`.    
+
+
