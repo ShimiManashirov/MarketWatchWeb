@@ -124,11 +124,14 @@ describe('Comment API', () => {
                 .send({ content: 'Second comment' });
         });
 
-        it('should get all comments for a post', async () => {
+        it('should get all comments for a post with pagination', async () => {
             const res = await request(app).get(`/posts/${postId}/comments`);
             expect(res.statusCode).toBe(200);
-            expect(res.body.length).toBe(2);
-            expect(res.body[0].content).toBe('First comment');
+            expect(res.body).toHaveProperty('comments');
+            expect(res.body).toHaveProperty('pagination');
+            expect(res.body.comments.length).toBe(2);
+            expect(res.body.comments[0].content).toBe('First comment');
+            expect(res.body.pagination.totalComments).toBe(2);
         });
 
         it('should return empty array for post with no comments', async () => {
@@ -139,7 +142,9 @@ describe('Comment API', () => {
 
             const res = await request(app).get(`/posts/${newPostRes.body._id}/comments`);
             expect(res.statusCode).toBe(200);
-            expect(res.body.length).toBe(0);
+            expect(res.body).toHaveProperty('comments');
+            expect(res.body.comments.length).toBe(0);
+            expect(res.body.pagination.totalComments).toBe(0);
         });
 
         it('should return 404 for non-existent post', async () => {

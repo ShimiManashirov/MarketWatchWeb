@@ -35,9 +35,21 @@ const postSchema = new Schema<IPost>({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }]
-}, { timestamps: true });
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
 
 // Index for faster queries by owner
 postSchema.index({ owner: 1, createdAt: -1 });
+
+// Virtual field for comment count
+postSchema.virtual('commentCount', {
+    ref: 'Comment',
+    localField: '_id',
+    foreignField: 'post',
+    count: true
+});
 
 export default mongoose.model<IPost>('Post', postSchema);

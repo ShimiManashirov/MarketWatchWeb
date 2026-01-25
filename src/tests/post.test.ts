@@ -110,10 +110,13 @@ describe('Post API', () => {
                 .send({ title: 'Post 2', content: 'Content 2' });
         });
 
-        it('should get all posts', async () => {
+        it('should get all posts with pagination', async () => {
             const res = await request(app).get('/posts');
             expect(res.statusCode).toBe(200);
-            expect(res.body.length).toBe(2);
+            expect(res.body).toHaveProperty('posts');
+            expect(res.body).toHaveProperty('pagination');
+            expect(res.body.posts.length).toBe(2);
+            expect(res.body.pagination.totalPosts).toBe(2);
         });
     });
 
@@ -230,22 +233,28 @@ describe('Post API', () => {
                 .send({ title: 'User2 Post', content: 'Content' });
         });
 
-        it('should get posts by specific owner', async () => {
+        it('should get posts by specific owner with pagination', async () => {
             const res = await request(app)
                 .get(`/posts/owner/${user1Id}`)
                 .set('Authorization', `Bearer ${user1Token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(res.body.length).toBe(2);
+            expect(res.body).toHaveProperty('posts');
+            expect(res.body).toHaveProperty('pagination');
+            expect(res.body.posts.length).toBe(2);
+            expect(res.body.pagination.totalPosts).toBe(2);
         });
 
-        it('should get own posts when using /my-posts', async () => {
+        it('should get own posts when using /my-posts with pagination', async () => {
             const res = await request(app)
                 .get('/posts/my-posts')
                 .set('Authorization', `Bearer ${user2Token}`);
 
             expect(res.statusCode).toBe(200);
-            expect(res.body.length).toBe(1);
+            expect(res.body).toHaveProperty('posts');
+            expect(res.body).toHaveProperty('pagination');
+            expect(res.body.posts.length).toBe(1);
+            expect(res.body.pagination.totalPosts).toBe(1);
         });
     });
 

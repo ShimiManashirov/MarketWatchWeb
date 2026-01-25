@@ -36,11 +36,33 @@ const createPost = async (req: AuthRequest, res: Response) => {
 
 const getAllPosts = async (req: AuthRequest, res: Response) => {
     try {
+        // Pagination parameters
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
+        // Get total count for pagination info
+        const total = await Post.countDocuments();
+
+        // Get posts with pagination
         const posts = await Post.find()
             .populate('owner', 'username image')
-            .sort({ createdAt: -1 });
+            .populate('commentCount')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.status(200).json(posts);
+        res.status(200).json({
+            posts,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPosts: total,
+                postsPerPage: limit,
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPrevPage: page > 1
+            }
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to fetch posts';
         res.status(400).json({ message });
@@ -66,11 +88,34 @@ const getPostById = async (req: AuthRequest, res: Response) => {
 const getPostsByOwner = async (req: AuthRequest, res: Response) => {
     try {
         const ownerId = req.params.ownerId || req.user?._id;
+
+        // Pagination parameters
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
+        // Get total count for pagination info
+        const total = await Post.countDocuments({ owner: ownerId });
+
+        // Get posts with pagination
         const posts = await Post.find({ owner: ownerId })
             .populate('owner', 'username image')
-            .sort({ createdAt: -1 });
+            .populate('commentCount')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.status(200).json(posts);
+        res.status(200).json({
+            posts,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalPosts: total,
+                postsPerPage: limit,
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPrevPage: page > 1
+            }
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to fetch posts';
         res.status(400).json({ message });

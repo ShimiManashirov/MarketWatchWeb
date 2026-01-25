@@ -48,11 +48,32 @@ const getCommentsByPost = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({ message: "Post not found" });
         }
 
+        // Pagination parameters
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 20;
+        const skip = (page - 1) * limit;
+
+        // Get total count for pagination info
+        const total = await Comment.countDocuments({ post: postId });
+
+        // Get comments with pagination
         const comments = await Comment.find({ post: postId })
             .populate('owner', 'username image')
-            .sort({ createdAt: 1 }); // Oldest first for comments
+            .sort({ createdAt: 1 }) // Oldest first for comments
+            .skip(skip)
+            .limit(limit);
 
-        res.status(200).json(comments);
+        res.status(200).json({
+            comments,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(total / limit),
+                totalComments: total,
+                commentsPerPage: limit,
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPrevPage: page > 1
+            }
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to fetch comments';
         res.status(400).json({ message });
