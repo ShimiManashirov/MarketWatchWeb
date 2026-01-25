@@ -1,0 +1,59 @@
+### Register a new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "username": "shimi",
+    "email": "shimi@example.com",
+    "password": "password123"
+}
+
+### Login
+# @name login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "email": "shimi@example.com",
+    "password": "password123"
+}
+
+### Variables from login response
+@accessToken = {{login.response.body.accessToken}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+### Logout
+POST http://localhost:3000/auth/logout
+Content-Type: application/json
+
+{
+    "refreshToken": "{{refreshToken}}"
+}
+
+### Protected Route Test (Example)
+GET http://localhost:3000/auth/test-protected
+Authorization: Bearer {{accessToken}}
+
+
+### Variables (Update after Login)
+@accessToken = YOUR_ACCESS_TOKEN_HERE
+
+### Update Profile with Image
+# Note: Ensure the file 'test_image.png' exists in the same folder as this .rest file
+PUT http://localhost:3000/user/update
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="username"
+
+shimi_updated
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="test_image.png"
+Content-Type: image/png
+
+< ./test_image.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+### Get User Profile
+GET http://localhost:3000/user/profile
+Authorization: Bearer {{accessToken}}  
