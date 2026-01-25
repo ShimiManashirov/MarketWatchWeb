@@ -4,7 +4,7 @@ import { AuthRequest } from '../middleware/auth_middleware';
 
 const getProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const user = await User.findById(req.user?._id).select('-password -refreshTokens');
+        const user = await User.findById(req.user?._id);
         if (!user) return res.status(404).send("User not found");
         res.status(200).send(user);
     } catch (err) {
@@ -15,19 +15,24 @@ const getProfile = async (req: AuthRequest, res: Response) => {
 const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?._id;
-        const { username } = req.body;
-        let updateData: any = { username };
+        const { username, imageUrl } = req.body;
+        // Build update object only with provided fields
+        const updateData: { username?: string; image?: string } = {};
+        if (username) updateData.username = username;
 
-        // If a new file was uploaded, add its path to the update object
+        // If a new file was uploaded, prefer that file path
         if (req.file) {
             updateData.image = req.file.path;
+        } else if (imageUrl) {
+            // Allow providing an external image URL
+            updateData.image = imageUrl;
         }
 
         const updatedUser = await User.findByIdAndUpdate(
-            userId, 
-            updateData, 
+            userId,
+            updateData,
             { new: true }
-        ).select('-password -refreshTokens');
+        );
 
         res.status(200).send(updatedUser);
     } catch (err) {

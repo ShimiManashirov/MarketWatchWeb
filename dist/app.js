@@ -48,17 +48,22 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json()); // Parses incoming requests with JSON payloads
 app.use(express_1.default.urlencoded({ extended: true }));
-// ... (after authRoutes)
-const userRoutes = userRoutesModule.default;
-app.use('/user', userRoutes);
 // Static folder for uploaded files (Images)
 app.use('/uploads', express_1.default.static('src/uploads'));
 // Routes
 app.use('/auth', auth_routes_1.default);
+const userRoutes = userRoutesModule.default;
+app.use('/user', userRoutes);
+const post_routes_1 = __importDefault(require("./routes/post_routes"));
+app.use('/posts', post_routes_1.default);
+const comment_routes_1 = __importDefault(require("./routes/comment_routes"));
+app.use('/', comment_routes_1.default);
 // DB Connection
 const mongoUrl = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_db';
-mongoose_1.default.connect(mongoUrl)
-    .then(() => console.log('Connected to Local MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
+if (process.env.NODE_ENV !== 'test') {
+    mongoose_1.default.connect(mongoUrl)
+        .then(() => console.log('Connected to Local MongoDB'))
+        .catch(err => console.error('MongoDB connection error:', err));
+}
 exports.default = app;
 //# sourceMappingURL=app.js.map

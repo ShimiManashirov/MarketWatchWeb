@@ -6,14 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const user_model_1 = __importDefault(require("../models/user_model"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const generateTokens = (userId) => {
-    const accessSecret = process.env.JWT_SECRET;
-    const refreshSecret = process.env.REFRESH_TOKEN_SECRET;
+const generateTokens = (_id) => {
+    const accessSecret = process.env.JWT_SECRET || 'test_secret';
+    const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'test_refresh_secret';
     if (!accessSecret || !refreshSecret) {
         throw new Error('Missing JWT secrets in environment');
     }
-    const accessToken = jsonwebtoken_1.default.sign({ _id: userId }, accessSecret, { expiresIn: '1h' });
-    const refreshToken = jsonwebtoken_1.default.sign({ _id: userId }, refreshSecret);
+    const accessToken = jsonwebtoken_1.default.sign({ _id }, accessSecret, { expiresIn: '1h' });
+    const refreshToken = jsonwebtoken_1.default.sign({ _id, random: Math.random() }, refreshSecret);
     return { accessToken, refreshToken };
 };
 const register = async (req, res) => {
@@ -35,13 +35,16 @@ const register = async (req, res) => {
 };
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await user_model_1.default.findOne({ email });
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ message: "Username and password are required" });
+        }
+        const user = await user_model_1.default.findOne({ username }).select('+password +refreshTokens');
         if (!user || !user.password)
-            return res.status(400).send("Invalid email or password");
+            return res.status(400).send("Invalid username or password");
         const validPass = await bcryptjs_1.default.compare(password, user.password);
         if (!validPass)
-            return res.status(400).send("Invalid email or password");
+            return res.status(400).send("Invalid username or password");
         const { accessToken, refreshToken } = generateTokens(user._id.toString());
         user.refreshTokens.push(refreshToken);
         await user.save();
@@ -59,11 +62,12 @@ const refresh = async (req, res) => {
         return res.status(401).send("No refresh token provided");
     try {
         // Find user who owns this refresh token
-        const user = await user_model_1.default.findOne({ refreshTokens: refreshToken });
+        const user = await user_model_1.default.findOne({ refreshTokens: refreshToken }).select('+refreshTokens');
         if (!user)
             return res.status(403).send("Invalid refresh token");
         // Verify the token
-        jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+        const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'test_refresh_secret';
+        jsonwebtoken_1.default.verify(refreshToken, refreshSecret, (err, decoded) => {
             if (err)
                 return res.status(403).send("Invalid refresh token");
             // Generate new tokens
@@ -84,7 +88,7 @@ const logout = async (req, res) => {
     if (!refreshToken)
         return res.status(401).send("No token provided");
     try {
-        const user = await user_model_1.default.findOne({ refreshTokens: refreshToken });
+        const user = await user_model_1.default.findOne({ refreshTokens: refreshToken }).select('+refreshTokens');
         if (!user)
             return res.status(403).send("Invalid token");
         // Remove the specific refresh token from DB to logout the device
