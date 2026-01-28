@@ -4,7 +4,7 @@ export interface User {
     _id: string;
     username: string;
     email: string;
-    imgUrl?: string; // Correct property name from backend usually
+    image?: string; // Correct property name from backend is image
 }
 
 export const register = async (userData: FormData) => {
