@@ -9,6 +9,7 @@ import CreatePost from './pages/CreatePost';
 import EditProfile from './pages/EditProfile';
 import PostDetails from './pages/PostDetails';
 import UserProfile from './pages/UserProfile';
+import SmartSearch from './pages/SmartSearch';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/profile" element={<UserProfile />} />
             <Route path="/profile/edit" element={<EditProfile />} />
             <Route path="/post/:id" element={<PostDetails />} />
+            <Route path="/search" element={<SmartSearch />} />
             {/* Add Profile (view) etc. here later */}
           </Route>
         </Routes>
