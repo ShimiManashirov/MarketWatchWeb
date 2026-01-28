@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Image, Button, Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { getPostsByOwner, type Post } from '../services/postService';
+import { getImageUrl } from '../services/api';
 import PostCard from '../components/PostCard';
 import { User, Edit2, Grid, List as ListIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -120,7 +121,7 @@ const UserProfile = () => {
                                         {post.image ? (
                                             <Card.Img
                                                 variant="top"
-                                                src={`http://localhost:3000/${post.image}`}
+                                                src={getImageUrl(post.image)}
                                                 className="position-absolute top-0 start-0 w-100 h-100"
                                                 style={{ objectFit: 'cover' }}
                                             />
