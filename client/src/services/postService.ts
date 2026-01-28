@@ -43,6 +43,10 @@ export const getPostsByOwner = async (ownerId: string) => {
     return api.get(`/posts/owner/${ownerId}`);
 };
 
+export const getPostById = async (postId: string) => {
+    return api.get<Post>(`/posts/${postId}`);
+};
+
 export const likePost = async (postId: string) => {
     return api.post(`/posts/${postId}/like`);
 };

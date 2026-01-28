@@ -7,6 +7,7 @@ import AuthSuccess from './pages/AuthSuccess';
 import Home from './pages/Home';
 import CreatePost from './pages/CreatePost';
 import EditProfile from './pages/EditProfile';
+import PostDetails from './pages/PostDetails';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/profile/edit" element={<EditProfile />} />
+            <Route path="/post/:id" element={<PostDetails />} />
             {/* Add Profile (view) etc. here later */}
           </Route>
         </Routes>
