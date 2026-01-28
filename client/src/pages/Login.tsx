@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { login as loginApi } from '../services/authService';
+import { API_URL } from '../services/api'; // Import API_URL
 import { Container, Row, Col, Form, Button, Alert, Card } from 'react-bootstrap';
 
 const Login = () => {
@@ -40,7 +41,7 @@ const Login = () => {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = 'http://localhost:3000/auth/google';
+        window.location.href = `${API_URL}/auth/google`;
     };
 
     return (

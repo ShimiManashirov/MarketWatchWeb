@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000'; // Make sure this matches your backend URL
+// Use environment variable or fallback to localhost
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+export const getImageUrl = (path: string | undefined): string | undefined => {
+    if (!path) return undefined;
+    if (path.startsWith('http')) return path;
+    return `${API_URL}/${path.startsWith('/') ? path.slice(1) : path}`;
+};
 
 const api = axios.create({
     baseURL: API_URL,

@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Container, Card, Image, Spinner, Button } from 'react-bootstrap';
 import { getPostById, type Post } from '../services/postService';
+import { getImageUrl } from '../services/api';
 import CommentSection from '../components/CommentSection';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
 
@@ -80,7 +81,7 @@ const PostDetails = () => {
                 {post.image && (
                     <Card.Img
                         variant="top"
-                        src={`http://localhost:3000/${post.image}`}
+                        src={getImageUrl(post.image)}
                         className="rounded-0"
                         style={{ maxHeight: '600px', objectFit: 'contain', backgroundColor: '#f8f9fa' }}
                     />

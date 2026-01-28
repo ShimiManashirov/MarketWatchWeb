@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Image } from 'react-bootstrap';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { type Post, likePost, unlikePost } from '../services/postService';
+import { getImageUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 interface PostCardProps {
@@ -54,10 +55,7 @@ const PostCard = ({ post }: PostCardProps) => {
             {post.image && (
                 <Card.Img
                     variant="top"
-                    src={`http://localhost:3000/${post.image}`} // Assuming backend serves uploads at root or via proxy
-                    // Note: Backend 'app.ts' says: app.use('/uploads', express.static('src/uploads')); 
-                    // So if DB saves 'uploads/file.png', URL is http://localhost:3000/uploads/file.png
-                    // We need to check what correct path is stored in DB.
+                    src={getImageUrl(post.image)}
                     className="rounded-0"
                     style={{ maxHeight: '500px', objectFit: 'cover' }}
                 />
