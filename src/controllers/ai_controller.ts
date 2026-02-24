@@ -1,9 +1,9 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth_middleware';
 import geminiService from '../services/gemini_service';
 import Post from '../models/post_model';
 
-const analyzeQuery = async (req: AuthRequest, res: Response) => {
+const analyzeQuery = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
 
@@ -24,7 +24,7 @@ const analyzeQuery = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const smartSearch = async (req: AuthRequest, res: Response) => {
+const smartSearch = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
 
@@ -61,7 +61,7 @@ const smartSearch = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const generateSuggestions = async (req: AuthRequest, res: Response) => {
+const generateSuggestions = async (req: Request, res: Response) => {
     try {
         const { topic } = req.body;
 
@@ -81,7 +81,7 @@ const generateSuggestions = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const analyzePost = async (req: AuthRequest, res: Response) => {
+const analyzePost = async (req: Request, res: Response) => {
     try {
         const { postId } = req.params;
 

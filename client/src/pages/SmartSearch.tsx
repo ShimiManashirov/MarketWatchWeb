@@ -22,8 +22,9 @@ const SmartSearch = () => {
             const response = await smartSearch(query);
             setResult(response.data);
         } catch (err: any) {
-            console.error(err);
-            setError(err.response?.data?.message || 'Failed to perform smart search');
+            const status = err.response?.status || '';
+            const msg = err.response?.data?.message || 'Smart search is currently unavailable';
+            setError(`${msg}${status ? ` (${status})` : ''}`);
         } finally {
             setLoading(false);
         }

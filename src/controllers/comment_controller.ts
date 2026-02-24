@@ -1,13 +1,13 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Comment from '../models/comment_model';
 import Post from '../models/post_model';
 import { AuthRequest } from '../middleware/auth_middleware';
 
-const createComment = async (req: AuthRequest, res: Response) => {
+const createComment = async (req: Request, res: Response) => {
     try {
         const { content } = req.body;
         const postId = req.params.postId;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         if (!content) {
             return res.status(400).json({ message: "Content is required" });
@@ -38,7 +38,7 @@ const createComment = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const getCommentsByPost = async (req: AuthRequest, res: Response) => {
+const getCommentsByPost = async (req: Request, res: Response) => {
     try {
         const postId = req.params.postId;
 
@@ -80,10 +80,10 @@ const getCommentsByPost = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const updateComment = async (req: AuthRequest, res: Response) => {
+const updateComment = async (req: Request, res: Response) => {
     try {
         const commentId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
         const { content } = req.body;
 
         if (!content) {
@@ -113,10 +113,10 @@ const updateComment = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const deleteComment = async (req: AuthRequest, res: Response) => {
+const deleteComment = async (req: Request, res: Response) => {
     try {
         const commentId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         const comment = await Comment.findById(commentId);
         if (!comment) {

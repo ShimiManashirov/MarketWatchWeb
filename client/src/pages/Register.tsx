@@ -36,7 +36,7 @@ const Register = () => {
             // Assuming successful register -> redirect to login
             navigate('/login');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to register');
+            setError(err.response?.data?.message || err.response?.data || 'Failed to register');
         } finally {
             setLoading(false);
         }

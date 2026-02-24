@@ -53,3 +53,6 @@ OAUTH_SETUP.md
 OAUTH_COMPLETE.md
 PAGINATION_COMPLETE.md
 CLEANUP_SUMMARY.md
+
+# PDF documents (specs, mockups — local only)
+*.pdf

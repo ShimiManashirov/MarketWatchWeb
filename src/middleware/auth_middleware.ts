@@ -5,7 +5,7 @@ export interface AuthRequest extends Request {
     user?: { _id: string };
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
 
@@ -19,7 +19,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
             return res.status(403).send("Invalid or expired token");
         }
 
-        req.user = decoded as { _id: string };
+        (req as AuthRequest).user = decoded as { _id: string };
         next();
     });
 };

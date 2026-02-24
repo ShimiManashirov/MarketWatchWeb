@@ -1,11 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Post from '../models/post_model';
 import { AuthRequest } from '../middleware/auth_middleware';
 
-const createPost = async (req: AuthRequest, res: Response) => {
+const createPost = async (req: Request, res: Response) => {
     try {
         const { title, content, imageUrl } = req.body;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         if (!title || !content) {
             return res.status(400).json({ message: "Title and content are required" });
@@ -34,7 +34,7 @@ const createPost = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const getAllPosts = async (req: AuthRequest, res: Response) => {
+const getAllPosts = async (req: Request, res: Response) => {
     try {
         // Pagination parameters
         const page = parseInt(req.query.page as string) || 1;
@@ -69,7 +69,7 @@ const getAllPosts = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const getPostById = async (req: AuthRequest, res: Response) => {
+const getPostById = async (req: Request, res: Response) => {
     try {
         const post = await Post.findById(req.params.id)
             .populate('owner', 'username image');
@@ -85,9 +85,9 @@ const getPostById = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const getPostsByOwner = async (req: AuthRequest, res: Response) => {
+const getPostsByOwner = async (req: Request, res: Response) => {
     try {
-        const ownerId = req.params.ownerId || req.user?._id;
+        const ownerId = req.params.ownerId || (req as AuthRequest).user?._id;
 
         // Pagination parameters
         const page = parseInt(req.query.page as string) || 1;
@@ -122,10 +122,10 @@ const getPostsByOwner = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const updatePost = async (req: AuthRequest, res: Response) => {
+const updatePost = async (req: Request, res: Response) => {
     try {
         const postId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -163,10 +163,10 @@ const updatePost = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const deletePost = async (req: AuthRequest, res: Response) => {
+const deletePost = async (req: Request, res: Response) => {
     try {
         const postId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -186,10 +186,10 @@ const deletePost = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const likePost = async (req: AuthRequest, res: Response) => {
+const likePost = async (req: Request, res: Response) => {
     try {
         const postId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         const post = await Post.findById(postId);
         if (!post) {
@@ -216,10 +216,10 @@ const likePost = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const unlikePost = async (req: AuthRequest, res: Response) => {
+const unlikePost = async (req: Request, res: Response) => {
     try {
         const postId = req.params.id;
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
 
         const post = await Post.findById(postId);
         if (!post) {
