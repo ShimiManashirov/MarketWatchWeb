@@ -1,29 +1,56 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
 class GeminiService {
-    private genAI: GoogleGenerativeAI | null = null;
-    private model: any = null;
-    private isInitialized: boolean = false;
+    // We are keeping the class name as GeminiService to avoid refactoring the controllers, 
+    // but we are using OpenRouter as the provider under the hood.
+    private apiKey: string = "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";
 
-    constructor() {
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey || apiKey === 'your-gemini-api-key-here') {
-            console.warn('GEMINI_API_KEY is not configured. AI features will be disabled.');
-            return;
-        }
-
+    private async callOpenRouter(prompt: string): Promise<string> {
         try {
-            this.genAI = new GoogleGenerativeAI(apiKey);
-            this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-            this.isInitialized = true;
-        } catch (error) {
-            console.error('Failed to initialize Gemini AI:', error);
-        }
-    }
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${this.apiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    // Use standard tier Gemini 2.0 Flash to avoid free-tier upstream rate limits
+                    model: "google/gemini-2.0-flash-001",
+                    messages: [
+                        { role: "user", content: prompt }
+                    ]
+                })
+            });
 
-    private checkInitialized(): void {
-        if (!this.isInitialized || !this.model) {
-            throw new Error('Gemini AI is not properly configured. Please set GEMINI_API_KEY in your .env file.');
+            if (!response.ok) {
+                const errText = await response.text();
+                // Fallback to GPT-4o-mini
+                const fallbackResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "openai/gpt-4o-mini",
+                        messages: [
+                            { role: "user", content: prompt }
+                        ]
+                    })
+                });
+
+                if (!fallbackResponse.ok) {
+                    console.error('OpenRouter Primary Error:', errText);
+                    console.error('OpenRouter Fallback Error:', await fallbackResponse.text());
+                    throw new Error('AI Provider error');
+                }
+                const fallbackData = await fallbackResponse.json() as any;
+                return fallbackData.choices[0].message.content || '';
+            }
+
+            const data = await response.json() as any;
+            return data.choices[0].message.content || '';
+        } catch (error) {
+            console.error('Network or Parsing Error with OpenRouter:', error);
+            throw error;
         }
     }
 
@@ -31,8 +58,6 @@ class GeminiService {
      * Analyze a financial query and return insights
      */
     async analyzeFinancialQuery(query: string): Promise<string> {
-        this.checkInitialized();
-
         try {
             const prompt = `
 You are a financial analysis expert. Analyze the following query and provide detailed financial insights:
@@ -48,9 +73,7 @@ Please provide:
 Keep the response professional, concise, and data-driven.
 `;
 
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            return response.text();
+            return await this.callOpenRouter(prompt);
         } catch (error) {
             console.error('Error analyzing financial query:', error);
             throw new Error('Failed to analyze query with AI');
@@ -67,8 +90,6 @@ Keep the response professional, concise, and data-driven.
         suggestions: string[];
         intent: string[];
     }> {
-        this.checkInitialized();
-
         try {
             const prompt = `
 You are a smart search assistant for MarketWatch, a financial social media platform where users share posts about markets, stocks, and investments. Users can create posts (with text and images), comment on posts, and have user profiles.
@@ -87,9 +108,7 @@ Please provide a JSON response with:
 Respond ONLY with valid JSON, no markdown, no additional text.
 `;
 
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+            const text = await this.callOpenRouter(prompt);
 
             // Try to parse JSON from the response
             const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -112,9 +131,6 @@ Respond ONLY with valid JSON, no markdown, no additional text.
             };
         } catch (error: any) {
             console.error('Error in smart search:', error);
-            if (error?.status === 429 || error?.statusText === 'Too Many Requests') {
-                throw new Error('AI quota exceeded. The free tier limit has been reached — please wait a few minutes or enable billing on your Google AI project.');
-            }
             throw new Error('Smart search failed. Please try again later.');
         }
     }
@@ -123,8 +139,6 @@ Respond ONLY with valid JSON, no markdown, no additional text.
      * Generate post content suggestions based on a topic
      */
     async generatePostSuggestions(topic: string): Promise<string[]> {
-        this.checkInitialized();
-
         try {
             const prompt = `
 Generate 5 engaging post title suggestions for a financial social media platform about: "${topic}"
@@ -137,9 +151,7 @@ Each suggestion should be:
 Return as a JSON array of strings.
 `;
 
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+            const text = await this.callOpenRouter(prompt);
 
             const jsonMatch = text.match(/\[[\s\S]*\]/);
             if (jsonMatch) {
@@ -161,8 +173,6 @@ Return as a JSON array of strings.
         topics: string[];
         summary: string;
     }> {
-        this.checkInitialized();
-
         try {
             const prompt = `
 Analyze this financial post content:
@@ -177,9 +187,7 @@ Provide a JSON response with:
 Respond ONLY with valid JSON.
 `;
 
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
+            const text = await this.callOpenRouter(prompt);
 
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
