@@ -26,6 +26,17 @@ const getStockQuote = async (symbol: string) => {
     }
 };
 
+const getHistoricalData = async (symbol: string, period1: string, period2: string | Date = new Date(), interval: '1d' | '1wk' | '1mo' = '1d') => {
+    try {
+        const queryOptions: any = { period1, period2, interval };
+        const results = await yahooFinance.historical(symbol, queryOptions, { validateResult: false });
+        return results;
+    } catch (error) {
+        console.error('Yahoo Finance Historical Error:', error);
+        throw new Error(`Unable to fetch historical data for ${symbol}.`);
+    }
+};
+
 const createAlert = async (userId: string, symbol: string, targetPrice: number, condition: 'ABOVE' | 'BELOW') => {
     const alert = new StockAlert({
         user: userId,
@@ -89,6 +100,7 @@ const updateAlert = async (alertId: string, userId: string, data: { targetPrice?
 export default {
     searchStocks,
     getStockQuote,
+    getHistoricalData,
     createAlert,
     getUserAlerts,
     deleteAlert,

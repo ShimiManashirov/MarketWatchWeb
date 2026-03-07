@@ -25,6 +25,46 @@ const getQuote = async (req: Request, res: Response) => {
     }
 };
 
+const getHistory = async (req: Request, res: Response) => {
+    try {
+        const symbol = req.params.symbol as string;
+        const { range } = req.query; // e.g. '1w', '1m', '6m', '1y'
+
+        const now = new Date();
+        let period1 = new Date();
+        let interval: '1d' | '1wk' | '1mo' = '1d';
+
+        switch (range) {
+            case '1w':
+                period1.setDate(now.getDate() - 7);
+                break;
+            case '1m':
+                period1.setMonth(now.getMonth() - 1);
+                break;
+            case '6m':
+                period1.setMonth(now.getMonth() - 6);
+                interval = '1wk'; // Use weekly intervals for 6+ months for performance
+                break;
+            case '1y':
+                period1.setFullYear(now.getFullYear() - 1);
+                interval = '1mo'; // Use monthly intervals for 1 year
+                break;
+            default:
+                period1.setMonth(now.getMonth() - 1); // default 1 month
+        }
+
+        const history = await stockService.getHistoricalData(
+            symbol,
+            period1.toISOString().split('T')[0],
+            now.toISOString().split('T')[0],
+            interval
+        );
+        res.status(200).json(history);
+    } catch (err: any) {
+        res.status(500).json({ message: err.message || 'Unable to fetch historical data', code: 500 });
+    }
+};
+
 const createAlert = async (req: Request, res: Response) => {
     try {
         const { symbol, targetPrice, condition } = req.body;
@@ -81,6 +121,7 @@ const updateAlert = async (req: Request, res: Response) => {
 export default {
     search,
     getQuote,
+    getHistory,
     createAlert,
     getAlerts,
     deleteAlert,

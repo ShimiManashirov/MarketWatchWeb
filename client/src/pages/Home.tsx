@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import PostCard from '../components/PostCard';
+import StockChart from '../components/StockChart';
 import { getAllPosts, type Post } from '../services/postService';
 
 const Home = () => {
@@ -51,6 +52,8 @@ const Home = () => {
         <Container>
             <Row className="justify-content-center">
                 <Col md={8} lg={6}>
+                    <StockChart />
+
                     {loading ? (
                         <div className="d-flex justify-content-center py-5">
                             <Spinner animation="border" variant="primary" />

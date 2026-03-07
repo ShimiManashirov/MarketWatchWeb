@@ -40,3 +40,7 @@ export const updateAlert = async (id: string, data: { targetPrice?: number; cond
     return api.put(`/stocks/alerts/${id}`, data);
 };
 
+export const getHistoricalData = async (symbol: string, range: string) => {
+    return api.get(`/stocks/history/${symbol}?range=${range}`);
+};
+

@@ -10,6 +10,9 @@ router.get('/search', authMiddleware, stockController.search);
 // Get quote
 router.get('/quote/:symbol', authMiddleware, stockController.getQuote);
 
+// Get historical data
+router.get('/history/:symbol', authMiddleware, stockController.getHistory);
+
 // Alerts
 router.post('/alerts', authMiddleware, stockController.createAlert);
 router.get('/alerts', authMiddleware, stockController.getAlerts);
