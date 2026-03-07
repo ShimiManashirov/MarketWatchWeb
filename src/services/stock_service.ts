@@ -2,11 +2,13 @@ import YahooFinance from 'yahoo-finance2';
 import StockAlert, { IStockAlert } from '../models/stock_alert_model';
 import User from '../models/user_model';
 
-const yahooFinance = new YahooFinance();
+// Suppress strict validation errors — Yahoo's API response sometimes
+// includes fields that don't match the library's schema exactly
+const yahooFinance = new YahooFinance({ validation: { logErrors: false } });
 
 const searchStocks = async (query: string) => {
     try {
-        const results = await yahooFinance.search(query) as any;
+        const results = await yahooFinance.search(query, {}, { validateResult: false }) as any;
         return (results.quotes || []).filter((q: any) => q.quoteType === 'EQUITY' || q.quoteType === 'INDEX' || q.quoteType === 'ETF');
     } catch (error) {
         console.error('Yahoo Finance Search Error:', error);
@@ -16,7 +18,7 @@ const searchStocks = async (query: string) => {
 
 const getStockQuote = async (symbol: string) => {
     try {
-        const quote = await yahooFinance.quote(symbol) as any;
+        const quote = await yahooFinance.quote(symbol, {}, { validateResult: false }) as any;
         return quote;
     } catch (error) {
         console.error('Yahoo Finance Quote Error:', error);
@@ -49,7 +51,7 @@ const checkAlerts = async () => {
 
     for (const symbol of symbols) {
         try {
-            const quote = await yahooFinance.quote(symbol) as any;
+            const quote = await yahooFinance.quote(symbol, {}, { validateResult: false }) as any;
             if (!quote || !quote.regularMarketPrice) continue;
 
             const currentPrice = quote.regularMarketPrice;

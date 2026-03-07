@@ -15,11 +15,11 @@ const PostCard = ({ post }: PostCardProps) => {
     const navigate = useNavigate();
     const [liked, setLiked] = useState((post.likes || []).includes(user?._id || ''));
     const [likesCount, setLikesCount] = useState((post.likes || []).length);
+    const [copied, setCopied] = useState(false);
 
     const handleLike = async () => {
         if (!user) return;
 
-        // Optimistic update
         const isLiking = !liked;
         setLiked(isLiking);
         setLikesCount(prev => isLiking ? prev + 1 : prev - 1);
@@ -31,10 +31,20 @@ const PostCard = ({ post }: PostCardProps) => {
                 await unlikePost(post._id);
             }
         } catch (error) {
-            // Revert on error
             setLiked(!isLiking);
             setLikesCount(prev => isLiking ? prev - 1 : prev + 1);
             console.error("Failed to toggle like", error);
+        }
+    };
+
+    const handleShare = async () => {
+        const url = `${window.location.origin}/post/${post._id}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`, '_blank');
         }
     };
 
@@ -43,13 +53,19 @@ const PostCard = ({ post }: PostCardProps) => {
     return (
         <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden hover-shadow transition-all">
             <Card.Header className="bg-white border-0 p-3 d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={openPost}>
-                <Image
-                    src={post.owner?.image || 'https://via.placeholder.com/40'}
-                    roundedCircle
-                    width={40}
-                    height={40}
-                    style={{ objectFit: 'cover' }}
-                />
+                {post.owner?.image ? (
+                    <Image
+                        src={getImageUrl(post.owner.image)}
+                        roundedCircle
+                        width={40}
+                        height={40}
+                        style={{ objectFit: 'cover' }}
+                    />
+                ) : (
+                    <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                        <span className="text-primary fw-bold">{post.owner?.username?.[0]?.toUpperCase() || 'U'}</span>
+                    </div>
+                )}
                 <div className="d-flex flex-column">
                     <span className="fw-bold text-dark">{post.owner?.username || 'Unknown User'}</span>
                     <span className="text-muted small">{new Date(post.createdAt).toLocaleDateString()}</span>
@@ -94,9 +110,16 @@ const PostCard = ({ post }: PostCardProps) => {
                         </Button>
                         <span className="text-muted small fw-medium">{(post.comments || []).length}</span>
 
-                        <Button variant="light" className="p-2 rounded-circle d-flex align-items-center justify-content-center border-0 text-muted bg-transparent ms-auto" style={{ width: '40px', height: '40px' }}>
+                        <Button
+                            variant="light"
+                            className={`p-2 rounded-circle d-flex align-items-center justify-content-center border-0 ms-auto ${copied ? 'text-success bg-success-subtle' : 'text-muted bg-transparent'}`}
+                            style={{ width: '40px', height: '40px' }}
+                            onClick={handleShare}
+                            title={copied ? 'Link copied!' : 'Share post'}
+                        >
                             <Share2 size={20} />
                         </Button>
+                        {copied && <span className="text-success small fw-medium">Copied!</span>}
                     </div>
                 </div>
             </Card.Body>
@@ -105,4 +128,3 @@ const PostCard = ({ post }: PostCardProps) => {
 };
 
 export default PostCard;
-

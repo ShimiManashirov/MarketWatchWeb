@@ -50,7 +50,7 @@ const Layout = () => {
                                     to="/search"
                                     className={`nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-pill ${isActive('/search') ? 'bg-primary bg-opacity-10 text-primary fw-medium' : ''}`}
                                 >
-                                    <Search size={18} /> Smart Search
+                                    <Search size={18} /> Search
                                 </Link>
                             </Nav>
                         )}
