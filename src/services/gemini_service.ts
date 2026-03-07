@@ -14,7 +14,7 @@ class GeminiService {
 
         try {
             this.genAI = new GoogleGenerativeAI(apiKey);
-            this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+            this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
             this.isInitialized = true;
         } catch (error) {
             console.error('Failed to initialize Gemini AI:', error);
@@ -59,27 +59,32 @@ Keep the response professional, concise, and data-driven.
 
     /**
      * Smart search that understands natural language queries
+     * and determines which app content types to search
      */
     async smartSearch(query: string, context?: any): Promise<{
         analysis: string;
         keywords: string[];
         suggestions: string[];
+        intent: string[];
     }> {
         this.checkInitialized();
 
         try {
             const prompt = `
-You are a smart search assistant for a financial social media platform.
+You are a smart search assistant for MarketWatch, a financial social media platform where users share posts about markets, stocks, and investments. Users can create posts (with text and images), comment on posts, and have user profiles.
+
+The user typed a search query. Your job is to understand what they are looking for and help the app find it.
 
 User Query: "${query}"
 ${context ? `Context: ${JSON.stringify(context)}` : ''}
 
 Please provide a JSON response with:
-1. "analysis": A brief analysis of what the user is looking for
-2. "keywords": Array of relevant search keywords (5-10 keywords)
-3. "suggestions": Array of suggested follow-up questions (3-5 suggestions)
+1. "analysis": A brief, helpful description of what the user seems to be looking for (1-2 sentences)
+2. "keywords": Array of relevant search keywords to match against content in the database (5-10 single words or short phrases, lowercase)
+3. "suggestions": Array of suggested follow-up searches the user might want to try (3-5 suggestions)
+4. "intent": Array of content types to search. Valid values: "posts", "users", "comments". Include all that are relevant. For example if user asks about a person, include "users". If they ask about content or topics, include "posts" and "comments".
 
-Respond ONLY with valid JSON, no additional text.
+Respond ONLY with valid JSON, no markdown, no additional text.
 `;
 
             const result = await this.model.generateContent(prompt);
@@ -89,18 +94,28 @@ Respond ONLY with valid JSON, no additional text.
             // Try to parse JSON from the response
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
+                const parsed = JSON.parse(jsonMatch[0]);
+                return {
+                    analysis: parsed.analysis || '',
+                    keywords: parsed.keywords || this.extractKeywords(query),
+                    suggestions: parsed.suggestions || [],
+                    intent: parsed.intent || ['posts']
+                };
             }
 
             // Fallback if JSON parsing fails
             return {
                 analysis: text,
                 keywords: this.extractKeywords(query),
-                suggestions: []
+                suggestions: [],
+                intent: ['posts', 'users', 'comments']
             };
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error in smart search:', error);
-            throw new Error('Failed to perform smart search');
+            if (error?.status === 429 || error?.statusText === 'Too Many Requests') {
+                throw new Error('AI quota exceeded. The free tier limit has been reached — please wait a few minutes or enable billing on your Google AI project.');
+            }
+            throw new Error('Smart search failed. Please try again later.');
         }
     }
 

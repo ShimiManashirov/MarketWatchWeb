@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import User from '../models/user_model';
 import { AuthRequest } from '../middleware/auth_middleware';
 
-const getProfile = async (req: AuthRequest, res: Response) => {
+const getProfile = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.user?._id);
+        const user = await User.findById((req as AuthRequest).user?._id);
         if (!user) return res.status(404).send("User not found");
         res.status(200).send(user);
     } catch (err) {
@@ -12,9 +12,9 @@ const getProfile = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const updateProfile = async (req: AuthRequest, res: Response) => {
+const updateProfile = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?._id;
+        const userId = (req as AuthRequest).user?._id;
         const { username, imageUrl } = req.body;
         // Build update object only with provided fields
         const updateData: { username?: string; image?: string } = {};

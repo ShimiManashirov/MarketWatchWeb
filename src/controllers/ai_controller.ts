@@ -1,9 +1,11 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth_middleware';
 import geminiService from '../services/gemini_service';
 import Post from '../models/post_model';
+import User from '../models/user_model';
+import Comment from '../models/comment_model';
 
-const analyzeQuery = async (req: AuthRequest, res: Response) => {
+const analyzeQuery = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
 
@@ -24,7 +26,7 @@ const analyzeQuery = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const smartSearch = async (req: AuthRequest, res: Response) => {
+const smartSearch = async (req: Request, res: Response) => {
     try {
         const { query } = req.body;
 
@@ -32,28 +34,64 @@ const smartSearch = async (req: AuthRequest, res: Response) => {
             return res.status(400).json({ message: "Query is required" });
         }
 
-        // Get AI analysis
+        // Get AI analysis with intent detection
         const aiResult = await geminiService.smartSearch(query);
-
-        // Search posts using keywords
         const keywords = aiResult.keywords.join('|');
-        const posts = await Post.find({
-            $or: [
-                { title: { $regex: keywords, $options: 'i' } },
-                { content: { $regex: keywords, $options: 'i' } }
-            ]
-        })
-            .populate('owner', 'username image')
-            .limit(10)
-            .sort({ createdAt: -1 });
+        const intent = aiResult.intent || ['posts'];
+
+        // Build results object based on AI-determined intent
+        const results: {
+            posts?: any[];
+            users?: any[];
+            comments?: any[];
+        } = {};
+
+        // Search Posts if intent includes posts (or as default)
+        if (intent.includes('posts') || intent.length === 0) {
+            results.posts = await Post.find({
+                $or: [
+                    { title: { $regex: keywords, $options: 'i' } },
+                    { content: { $regex: keywords, $options: 'i' } }
+                ]
+            })
+                .populate('owner', 'username image')
+                .limit(10)
+                .sort({ createdAt: -1 });
+        }
+
+        // Search Users if intent includes users
+        if (intent.includes('users')) {
+            results.users = await User.find({
+                username: { $regex: keywords, $options: 'i' }
+            })
+                .select('username image createdAt')
+                .limit(10);
+        }
+
+        // Search Comments if intent includes comments
+        if (intent.includes('comments')) {
+            results.comments = await Comment.find({
+                content: { $regex: keywords, $options: 'i' }
+            })
+                .populate('owner', 'username image')
+                .populate('post', 'title')
+                .limit(10)
+                .sort({ createdAt: -1 });
+        }
+
+        const totalResults =
+            (results.posts?.length || 0) +
+            (results.users?.length || 0) +
+            (results.comments?.length || 0);
 
         res.status(200).json({
             query,
             analysis: aiResult.analysis,
             keywords: aiResult.keywords,
             suggestions: aiResult.suggestions,
-            results: posts,
-            resultCount: posts.length
+            intent,
+            results,
+            resultCount: totalResults
         });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to perform smart search';
@@ -61,7 +99,7 @@ const smartSearch = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const generateSuggestions = async (req: AuthRequest, res: Response) => {
+const generateSuggestions = async (req: Request, res: Response) => {
     try {
         const { topic } = req.body;
 
@@ -81,7 +119,7 @@ const generateSuggestions = async (req: AuthRequest, res: Response) => {
     }
 };
 
-const analyzePost = async (req: AuthRequest, res: Response) => {
+const analyzePost = async (req: Request, res: Response) => {
     try {
         const { postId } = req.params;
 

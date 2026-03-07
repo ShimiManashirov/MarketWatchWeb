@@ -6,7 +6,10 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 export const getImageUrl = (path: string | undefined): string | undefined => {
     if (!path) return undefined;
     if (path.startsWith('http')) return path;
-    return `${API_URL}/${path.startsWith('/') ? path.slice(1) : path}`;
+    // Normalize Windows backslashes to forward slashes, then strip 'src/' prefix
+    // Multer on Windows stores paths like 'src\uploads\file.png'
+    const normalized = path.replace(/\\/g, '/').replace(/^src\//, '');
+    return `${API_URL}/${normalized.startsWith('/') ? normalized.slice(1) : normalized}`;
 };
 
 const api = axios.create({

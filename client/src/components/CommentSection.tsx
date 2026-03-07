@@ -148,14 +148,20 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
                 <div className="d-flex flex-column gap-3">
                     {comments.map(comment => (
                         <div key={comment._id} className="d-flex gap-2">
-                            <Image
-                                src={comment.owner?.image || 'https://via.placeholder.com/32'}
-                                roundedCircle
-                                width={32}
-                                height={32}
-                                className="border flex-shrink-0 mt-1"
-                                style={{ objectFit: 'cover' }}
-                            />
+                            {comment.owner?.image ? (
+                                <Image
+                                    src={comment.owner.image}
+                                    roundedCircle
+                                    width={32}
+                                    height={32}
+                                    className="border flex-shrink-0 mt-1"
+                                    style={{ objectFit: 'cover' }}
+                                />
+                            ) : (
+                                <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center border flex-shrink-0 mt-1" style={{ width: '32px', height: '32px' }}>
+                                    <span className="text-primary fw-bold small">{comment.owner?.username?.[0]?.toUpperCase() || 'U'}</span>
+                                </div>
+                            )}
                             <div className="flex-grow-1">
                                 <div className="bg-white p-3 rounded-4 shadow-sm position-relative group">
                                     <div className="d-flex justify-content-between align-items-start mb-1">
@@ -184,7 +190,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
                                     )}
 
                                     {/* Actions Dropdown */}
-                                    {user && user._id === comment.owner._id && editingId !== comment._id && (
+                                    {user && String(user._id) === String(comment.owner?._id) && editingId !== comment._id && (
                                         <div className="position-absolute top-0 end-0 mt-2 me-2">
                                             <Dropdown align="end">
                                                 <Dropdown.Toggle variant="link" className="p-0 text-muted no-arrow after-none" style={{ opacity: 0.5 }}>

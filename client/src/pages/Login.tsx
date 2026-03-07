@@ -1,17 +1,21 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { login as loginApi } from '../services/authService';
-import { API_URL } from '../services/api'; // Import API_URL
+import { API_URL } from '../services/api';
 import { Container, Row, Col, Form, Button, Alert, Card } from 'react-bootstrap';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Where to redirect after login (default: home)
+    const from = (location.state as any)?.from?.pathname || '/';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,22 +23,13 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await loginApi({ email, password });
-            // Expecting { accessToken, refreshToken, user } from backend
-            const { accessToken, refreshToken, user } = response.data; // or response.data.data depending on backend standard
-            // NOTE: backend auth_controller.ts login usually returns accessToken, refreshToken.
-            // We might need to fetch the user separately or the backend sends it. 
-            // Assuming for now backend sends user, if not we fetch profile.
+            const response = await loginApi({ username, password });
+            const { accessToken, refreshToken, user } = response.data;
 
-            // Checking backend manually: `authController.login` -> `res.status(200).send({ accessToken, refreshToken, ... })`
-            // Let's assume we might need to fetch profile if user is missing, but let's try to pass 'user' if available.
-            // If user is not in response, we use api.get('/user/profile') inside AuthProvider, 
-            // so we just call login() context which sets tokens.
-
-            login(user || { email, _id: 'temp', username: 'User' }, accessToken, refreshToken);
-            navigate('/');
+            login(user || { username, _id: 'temp' }, accessToken, refreshToken);
+            navigate(from, { replace: true });
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to login');
+            setError(err.response?.data?.message || err.response?.data || 'Failed to login');
         } finally {
             setLoading(false);
         }
@@ -56,13 +51,13 @@ const Login = () => {
                             {error && <Alert variant="danger">{error}</Alert>}
 
                             <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-3" controlId="email">
-                                    <Form.Label>Email Address</Form.Label>
+                                <Form.Group className="mb-3" controlId="username">
+                                    <Form.Label>Username</Form.Label>
                                     <Form.Control
-                                        type="email"
-                                        placeholder="name@example.com"
-                                        value={email}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                                        type="text"
+                                        placeholder="Enter your username"
+                                        value={username}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
                                         required
                                         className="p-3"
                                     />
@@ -112,3 +107,4 @@ const Login = () => {
 };
 
 export default Login;
+

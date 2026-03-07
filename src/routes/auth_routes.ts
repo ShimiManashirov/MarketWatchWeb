@@ -30,8 +30,9 @@ router.post('/refresh', authController.refresh);
  * @route GET /auth/test-protected
  * @desc Test protected route with JWT
  */
-router.get('/test-protected', authMiddleware, (req: AuthRequest, res) => {
-    res.status(200).json({ message: 'Access granted to protected route', user: req.user });
+router.get('/test-protected', authMiddleware, (req: express.Request, res) => {
+    const authReq = req as AuthRequest;
+    res.status(200).json({ message: 'Access granted to protected route', user: authReq.user });
 });
 
 /**

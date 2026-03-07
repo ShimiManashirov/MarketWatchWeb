@@ -1,43 +1,158 @@
-:root {
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --radius: 0.5rem;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  /* Brand Palette - Modern Blue & Indigo tones */
+  --primary-color: #2563eb;
+  --secondary-color: #475569;
+  --accent-color: #3b82f6;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+
+  /* Surfaces */
+  --bg-body: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Shadows - Soft & Diffused */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-soft: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  background-color: var(--bg-body);
+  color: #1e293b;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
+/* --- Bootstrap Overrides --- */
+
+/* Navbar: Glassmorphism */
+.navbar {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Cards: Modern, Rounded, Soft Shadows */
+.card {
+  border: none;
+  background: var(--bg-surface);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.hover-shadow:hover {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Buttons: Pill shape, subtle gradients */
+.btn {
+  border-radius: 9999px;
+  /* Pill shape */
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-light {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.btn-light:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+/* Inputs */
+.form-control {
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-color: #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  background-color: #fff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* --- Utilities & Animations --- */
+
+.fw-bold {
+  font-weight: 600 !important;
+}
+
+/* Subtle Gradient Background */
+.bg-gradient-brand-subtle {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Avatar Border */
+.avatar-ring {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #e2e8f0;
+}
+
+/* Links */
 a {
   text-decoration: none;
-  color: inherit;
+  transition: color 0.2s;
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  outline: none;
-  font-family: inherit;
-}
-
-input, textarea {
-  font-family: inherit;
+a:hover {
+  color: var(--primary-color);
 }

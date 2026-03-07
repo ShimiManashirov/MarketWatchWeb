@@ -1,12 +1,34 @@
 import api from './api';
 import type { Post } from './postService';
 
+export interface SearchUser {
+    _id: string;
+    username: string;
+    image?: string;
+    createdAt: string;
+}
+
+export interface SearchComment {
+    _id: string;
+    content: string;
+    owner: { _id: string; username: string; image?: string };
+    post: { _id: string; title: string };
+    createdAt: string;
+}
+
+export interface AISearchResults {
+    posts?: Post[];
+    users?: SearchUser[];
+    comments?: SearchComment[];
+}
+
 export interface AIAnalysisResponse {
     query: string;
     analysis: string;
     keywords: string[];
     suggestions: string[];
-    results: Post[];
+    intent: string[];
+    results: AISearchResults;
     resultCount: number;
 }
 
