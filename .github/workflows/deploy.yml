@@ -1,0 +1,29 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ "production" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Environment Variables
+      run: |
+        # Ensure .env exists (should be managed on server, but can be updated here if needed)
+        # For security, secrets should be in GitHub Secrets and injected during build if using Cloud Build
+        echo "Updating deployment..."
+
+    - name: Deploy with Docker Compose
+      run: |
+        docker-compose down
+        docker-compose up --build -d
+        
+    - name: Automatic Cleanup
+      run: |
+        docker system prune -f
+        docker volume prune -f
