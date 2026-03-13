@@ -2,39 +2,62 @@ import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Image, Button, Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { getPostsByOwner, type Post } from '../services/postService';
-import { getImageUrl } from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import PostCard from '../components/PostCard';
-import { User, Edit2, Grid, List as ListIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User as UserIcon, Edit2, Grid, List as ListIcon } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
 const UserProfile = () => {
-    const { user } = useAuth();
+    const { id } = useParams<{ id: string }>();
+    const { user: authUser } = useAuth();
+    const [profileUser, setProfileUser] = useState<any>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+    const isOwnProfile = !id || id === authUser?._id;
+
     useEffect(() => {
-        const fetchUserPosts = async () => {
-            if (user?._id) {
-                try {
-                    const response = await getPostsByOwner(user._id);
-                    // Handle pagination wrapper if present or direct array
+        const fetchProfileData = async () => {
+            setLoading(true);
+            try {
+                // Determine user to display
+                let targetUserId = authUser?._id;
+
+                if (id && id !== authUser?._id) {
+                    const userResponse = await api.get(`/user/${id}`);
+                    setProfileUser(userResponse.data);
+                    targetUserId = id;
+                } else if (authUser) {
+                    setProfileUser(authUser);
+                }
+
+                if (targetUserId) {
+                    const response = await getPostsByOwner(targetUserId);
                     const fetchedPosts = response.data.posts || (Array.isArray(response.data) ? response.data : []);
                     setPosts(fetchedPosts);
-                } catch (error) {
-                    console.error("Failed to fetch user posts", error);
-                } finally {
-                    setLoading(false);
                 }
+            } catch (error) {
+                console.error("Failed to fetch profile data", error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        if (user) {
-            fetchUserPosts();
+        if (authUser || id) {
+            fetchProfileData();
         }
-    }, [user]);
+    }, [id, authUser]);
 
-    if (!user) {
+    if (!profileUser && !loading) {
+        return (
+            <Container className="py-5 text-center">
+                <h3>User not found</h3>
+            </Container>
+        );
+    }
+
+    if (loading) {
         return (
             <Container className="py-5 text-center">
                 <Spinner animation="border" variant="primary" />
@@ -50,9 +73,9 @@ const UserProfile = () => {
                 <Card.Body className="position-relative pt-0 px-4 pb-4">
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-end">
                         <div className="d-flex flex-column align-items-center align-items-md-start" style={{ marginTop: '-60px' }}>
-                            {user?.image ? (
+                            {profileUser?.image ? (
                                 <Image
-                                    src={user.image}
+                                    src={getImageUrl(profileUser.image)}
                                     roundedCircle
                                     width={120}
                                     height={120}
@@ -61,26 +84,30 @@ const UserProfile = () => {
                                 />
                             ) : (
                                 <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border border-4 border-white shadow-sm mb-3" style={{ width: '120px', height: '120px', backgroundColor: '#fff' }}>
-                                    <User size={48} className="text-muted" />
+                                    <UserIcon size={48} className="text-muted" />
                                 </div>
                             )}
                             <div className="text-center text-md-start">
-                                <h2 className="fw-bold mb-0">{user.username}</h2>
-                                <p className="text-muted">{user.email}</p>
+                                <h2 className="fw-bold mb-0">{profileUser?.username}</h2>
+                                <p className="text-muted">{profileUser?.email}</p>
                             </div>
                         </div>
-                        <div className="mt-3 mt-md-0 mb-2">
-                            <Link to="/profile/edit" className="btn btn-outline-primary d-flex align-items-center gap-2 rounded-pill px-4">
-                                <Edit2 size={16} /> Edit Profile
-                            </Link>
-                        </div>
+                        {isOwnProfile && (
+                            <div className="mt-3 mt-md-0 mb-2">
+                                <Link to="/profile/edit" className="btn btn-outline-primary d-flex align-items-center gap-2 rounded-pill px-4">
+                                    <Edit2 size={16} /> Edit Profile
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </Card.Body>
             </Card>
 
             {/* Posts Section */}
             <div className="d-flex align-items-center justify-content-between mb-4">
-                <h4 className="fw-bold mb-0">My Posts</h4>
+                <h4 className="fw-bold mb-0">
+                    {isOwnProfile ? 'My Posts' : `${profileUser?.username || 'User'}'s Posts`}
+                </h4>
                 <div className="d-flex gap-2">
                     <Button
                         variant={viewMode === 'grid' ? 'primary' : 'light'}
@@ -149,10 +176,16 @@ const UserProfile = () => {
                         <Grid size={48} />
                     </div>
                     <h5>No posts yet</h5>
-                    <p className="text-muted mb-4">Share your first market insight to verify the flow.</p>
-                    <Link to="/create-post" className="btn btn-primary rounded-pill px-4">
-                        Create Post
-                    </Link>
+                    {isOwnProfile ? (
+                        <>
+                            <p className="text-muted mb-4">Share your first market insight to verify the flow.</p>
+                            <Link to="/create-post" className="btn btn-primary rounded-pill px-4">
+                                Create Post
+                            </Link>
+                        </>
+                    ) : (
+                        <p className="text-muted mb-0">This user hasn't posted anything yet.</p>
+                    )}
                 </div>
             )}
         </Container>

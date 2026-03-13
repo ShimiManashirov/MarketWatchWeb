@@ -175,7 +175,7 @@ const SmartSearch = () => {
                                         <Card
                                             className="border-0 shadow-sm rounded-4 overflow-hidden hover-shadow transition-all h-100"
                                             style={{ cursor: 'pointer' }}
-                                            onClick={() => navigate(`/profile`)}
+                                            onClick={() => navigate(`/profile/${user._id}`)}
                                         >
                                             <Card.Body className="d-flex align-items-center gap-3 p-3">
                                                 {user.image ? (

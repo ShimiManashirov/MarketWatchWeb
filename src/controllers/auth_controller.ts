@@ -54,11 +54,23 @@ const login = async (req: Request, res: Response) => {
 
         const { accessToken, refreshToken } = generateTokens(user._id.toString());
 
+        // Use atomic $push to avoid VersionError during login
+        const updatedUser = await User.findByIdAndUpdate(
+            user._id,
+            { $push: { refreshTokens: refreshToken } },
+            { new: true }
+        );
 
-        user.refreshTokens.push(refreshToken);
-        await user.save();
-
-        res.status(200).send({ accessToken, refreshToken, username: user.username, _id: user._id });
+        res.status(200).send({
+            accessToken,
+            refreshToken,
+            user: {
+                _id: updatedUser?._id,
+                username: updatedUser?.username,
+                email: updatedUser?.email,
+                image: updatedUser?.image
+            }
+        });
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Login failed';
         res.status(500).json({ message });
@@ -79,18 +91,31 @@ const refresh = async (req: Request, res: Response) => {
 
         // Verify the token
         const refreshSecret = process.env.REFRESH_TOKEN_SECRET || 'test_refresh_secret';
-        jwt.verify(refreshToken, refreshSecret, (err: any, decoded: any) => {
+        jwt.verify(refreshToken, refreshSecret, async (err: any, decoded: any) => {
             if (err) return res.status(403).send("Invalid refresh token");
 
             // Generate new tokens
             const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id.toString());
 
-            // Replace old refresh token with the new one in DB
-            user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
-            user.refreshTokens.push(newRefreshToken);
-            user.save();
+            // Replace old refresh token with new one atomically to avoid VersionError
+            try {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: user._id, refreshTokens: refreshToken },
+                    {
+                        $set: { "refreshTokens.$": newRefreshToken }
+                    },
+                    { new: true }
+                );
 
-            res.status(200).send({ accessToken, refreshToken: newRefreshToken });
+                if (!updatedUser) {
+                    return res.status(403).send("Refresh token already used or invalid");
+                }
+
+                res.status(200).send({ accessToken, refreshToken: newRefreshToken });
+            } catch (saveError) {
+                console.error("Token rotation error:", saveError);
+                res.status(500).send("Internal server error during token rotation");
+            }
         });
     } catch (err) {
         res.status(400).send(err);

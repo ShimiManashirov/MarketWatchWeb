@@ -5,31 +5,190 @@ import upload from '../middleware/file_middleware';
 
 const router = express.Router();
 
-// Create a new post (Protected + Optional File Upload)
+/**
+ * @swagger
+ * /posts:
+ *   post:
+ *     summary: Create a new post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Post created
+ */
 router.post('/', authMiddleware, upload.single('image'), postController.createPost);
 
-// Get all posts
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Get all posts
+ *     tags: [Posts]
+ *     responses:
+ *       200:
+ *         description: A list of posts
+ */
 router.get('/', postController.getAllPosts);
 
-// Get posts by owner (must come before /:id to avoid conflict)
+/**
+ * @swagger
+ * /posts/owner/{ownerId}:
+ *   get:
+ *     summary: Get posts by a specific owner
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: ownerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of posts
+ */
 router.get('/owner/:ownerId', authMiddleware, postController.getPostsByOwner);
 
-// Get own posts
+/**
+ * @swagger
+ * /posts/my-posts:
+ *   get:
+ *     summary: Get posts created by the authenticated user
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of posts
+ */
 router.get('/my-posts', authMiddleware, postController.getPostsByOwner);
 
-// Get a specific post by ID
+/**
+ * @swagger
+ * /posts/{id}:
+ *   get:
+ *     summary: Get a specific post by ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Post details
+ */
 router.get('/:id', postController.getPostById);
 
-// Update a post (Protected + Optional File Upload + Ownership Check)
+/**
+ * @swagger
+ * /posts/{id}:
+ *   put:
+ *     summary: Update a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Post updated
+ */
 router.put('/:id', authMiddleware, upload.single('image'), postController.updatePost);
 
-// Like a post (Protected)
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Post liked
+ */
 router.post('/:id/like', authMiddleware, postController.likePost);
 
-// Unlike a post (Protected)
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   delete:
+ *     summary: Unlike a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Post unliked
+ */
 router.delete('/:id/like', authMiddleware, postController.unlikePost);
 
-// Delete a post (Protected + Ownership Check)
+/**
+ * @swagger
+ * /posts/{id}:
+ *   delete:
+ *     summary: Delete a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Post deleted
+ */
 router.delete('/:id', authMiddleware, postController.deletePost);
 
 export default router;

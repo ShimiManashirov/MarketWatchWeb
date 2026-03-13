@@ -3,6 +3,7 @@ import { Card, Button, Form, Image, Spinner, Dropdown } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { getComments, createComment, deleteComment, updateComment, type Comment } from '../services/commentService';
 import { Send, MoreVertical, Trash2, Edit2, X, Check } from 'lucide-react';
+import { getImageUrl } from '../services/api';
 
 interface CommentSectionProps {
     postId: string;
@@ -105,7 +106,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
                     <Form onSubmit={handleSubmit} className="d-flex gap-2">
                         {user?.image ? (
                             <Image
-                                src={user.image}
+                                src={getImageUrl(user.image)}
                                 roundedCircle
                                 width={32}
                                 height={32}
@@ -150,7 +151,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
                         <div key={comment._id} className="d-flex gap-2">
                             {comment.owner?.image ? (
                                 <Image
-                                    src={comment.owner.image}
+                                    src={getImageUrl(comment.owner.image)}
                                     roundedCircle
                                     width={32}
                                     height={32}

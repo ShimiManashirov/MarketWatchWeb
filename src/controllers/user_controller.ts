@@ -40,4 +40,14 @@ const updateProfile = async (req: Request, res: Response) => {
     }
 };
 
-export default { getProfile, updateProfile };
+const getProfileById = async (req: Request, res: Response) => {
+    try {
+        const user = await User.findById(req.params.id).select('-refreshTokens');
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(400).json(err);
+    }
+};
+
+export default { getProfile, updateProfile, getProfileById };

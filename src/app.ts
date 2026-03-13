@@ -2,6 +2,8 @@ import express, { Express } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import passport from 'passport';
 import authRoutes from './routes/auth_routes';
 import * as userRoutesModule from './routes/user_routes';
@@ -14,9 +16,30 @@ dotenv.config();
 
 const app: Express = express();
 
+// Security Middlewares
+app.use(helmet({
+  crossOriginResourcePolicy: false, // allow images to be served cross origin
+}));
+
+// Rate limiting to prevent brute force / DDoS
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3001',
+  origin: [
+    'http://localhost:5173', // Vite default dev port
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    process.env.CLIENT_URL || ''
+  ].filter(Boolean),
   credentials: true
 }));
 app.use(express.json()); // Parses incoming requests with JSON payloads
@@ -27,8 +50,6 @@ app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
-
-// Initialize Passport
 
 // Initialize Passport
 setupPassport();
@@ -56,7 +77,9 @@ import watchlistRoutes from './routes/watchlist_routes';
 app.use('/watchlist', watchlistRoutes);
 
 import cronService from './services/cron_service';
-cronService.initCronJobs();
+if (process.env.NODE_ENV !== 'test') {
+  cronService.initCronJobs();
+}
 
 import path from 'path';
 

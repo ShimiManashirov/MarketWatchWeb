@@ -28,6 +28,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/profile" element={<UserProfile />} />
+            <Route path="/profile/:id" element={<UserProfile />} />
             <Route path="/profile/edit" element={<EditProfile />} />
             <Route path="/post/:id" element={<PostDetails />} />
             <Route path="/search" element={<SmartSearch />} />

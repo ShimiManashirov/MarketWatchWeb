@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Container, Navbar, Nav, Dropdown, Image } from 'react-bootstrap';
 import { LogOut, Search, PlusCircle, Home, TrendingUp, User, Bell } from 'lucide-react';
+import { getImageUrl } from '../services/api';
 
 const Layout = () => {
     const { user, logout } = useAuth();
@@ -54,7 +55,7 @@ const Layout = () => {
                                 </Link>
                             </Nav>
                         )}
-                        <Nav className="d-flex align-items-center gap-3">
+                        <Nav className="d-flex flex-row align-items-center justify-content-center gap-3 mt-3 mt-lg-0">
                             <Link
                                 to="/create-post"
                                 className="btn btn-light d-flex align-items-center justify-content-center p-2 rounded-circle border-0"
@@ -67,7 +68,7 @@ const Layout = () => {
                                 <Dropdown.Toggle variant="transparent" className="p-0 border-0 no-arrow after-none">
                                     {user?.image ? (
                                         <Image
-                                            src={user.image}
+                                            src={getImageUrl(user.image)}
                                             roundedCircle
                                             width={40}
                                             height={40}
