@@ -1,0 +1,28 @@
+name: Sync Production to Main (Hotfix)
+
+on:
+  push:
+    branches: [ "production" ]
+  workflow_dispatch:
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Reset main to production changes
+        run: |
+          git fetch origin production
+          git merge origin/production
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync/prod-to-main
+          title: "🤖 Sync Production to Main (Hotfix)"
+          body: "This PR was automatically generated to sync hotfixes from the `production` branch back to `main`."
+          base: main
+          head: sync/prod-to-main
