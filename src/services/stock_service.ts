@@ -2,9 +2,7 @@ import YahooFinance from 'yahoo-finance2';
 import StockAlert, { IStockAlert } from '../models/stock_alert_model';
 import User from '../models/user_model';
 
-// Suppress strict validation errors — Yahoo's API response sometimes
-// includes fields that don't match the library's schema exactly
-const yahooFinance = new YahooFinance({ validation: { logErrors: false } });
+const yahooFinance = new (YahooFinance as any)({ validation: { logErrors: false } });
 
 const searchStocks = async (query: string) => {
     try {
@@ -30,8 +28,9 @@ const getHistoricalData = async (symbol: string, period1: string, period2: strin
     try {
         const queryOptions: any = { period1, period2, interval };
         const results = await yahooFinance.historical(symbol, queryOptions, { validateResult: false });
-        return results;
-    } catch (error) {
+        return results || [];
+    } catch (error: any) {
+        if (error.message?.includes('No data')) return [];
         console.error('Yahoo Finance Historical Error:', error);
         throw new Error(`Unable to fetch historical data for ${symbol}.`);
     }

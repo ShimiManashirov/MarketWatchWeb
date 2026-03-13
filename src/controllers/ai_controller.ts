@@ -46,13 +46,19 @@ const smartSearch = async (req: Request, res: Response) => {
             comments?: any[];
         } = {};
 
+        // To ensure strict granularity, all keywords must match the record
+        // Instead of keywords.join('|') which acts as an OR, we require ALL keywords for each query
+        const keywordConditions = aiResult.keywords.map(kw => ({ $regex: kw, $options: 'i' }));
+
         // Search Posts if intent includes posts (or as default)
         if (intent.includes('posts') || intent.length === 0) {
             results.posts = await Post.find({
-                $or: [
-                    { title: { $regex: keywords, $options: 'i' } },
-                    { content: { $regex: keywords, $options: 'i' } }
-                ]
+                $and: keywordConditions.length ? keywordConditions.map(regex => ({
+                    $or: [
+                        { title: regex },
+                        { content: regex }
+                    ]
+                })) : [{}]
             })
                 .populate('owner', 'username image')
                 .limit(10)
@@ -62,7 +68,9 @@ const smartSearch = async (req: Request, res: Response) => {
         // Search Users if intent includes users
         if (intent.includes('users')) {
             results.users = await User.find({
-                username: { $regex: keywords, $options: 'i' }
+                $and: keywordConditions.length ? keywordConditions.map(regex => ({
+                    username: regex
+                })) : [{}]
             })
                 .select('username image createdAt')
                 .limit(10);
@@ -71,7 +79,9 @@ const smartSearch = async (req: Request, res: Response) => {
         // Search Comments if intent includes comments
         if (intent.includes('comments')) {
             results.comments = await Comment.find({
-                content: { $regex: keywords, $options: 'i' }
+                $and: keywordConditions.length ? keywordConditions.map(regex => ({
+                    content: regex
+                })) : [{}]
             })
                 .populate('owner', 'username image')
                 .populate('post', 'title')

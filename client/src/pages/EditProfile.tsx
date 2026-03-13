@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../services/userService';
 import { Upload, User as UserIcon } from 'lucide-react';
+import { getImageUrl } from '../services/api';
 
 const EditProfile = () => {
     const { user, setUser } = useAuth();
@@ -11,7 +12,7 @@ const EditProfile = () => {
 
     const [username, setUsername] = useState(user?.username || '');
     const [image, setImage] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(user?.image || null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(user?.image ? getImageUrl(user.image)! : null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -19,7 +20,7 @@ const EditProfile = () => {
     useEffect(() => {
         if (user) {
             setUsername(user.username);
-            setPreviewUrl(user.image || null);
+            setPreviewUrl(user.image ? getImageUrl(user.image)! : null);
         }
     }, [user]);
 

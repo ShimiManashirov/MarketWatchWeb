@@ -108,7 +108,7 @@ const PostCard = ({ post }: PostCardProps) => {
                         >
                             <MessageCircle size={20} />
                         </Button>
-                        <span className="text-muted small fw-medium">{(post.comments || []).length}</span>
+                        <span className="text-muted small fw-medium">{post.commentCount !== undefined ? post.commentCount : (post.comments || []).length}</span>
 
                         <Button
                             variant="light"

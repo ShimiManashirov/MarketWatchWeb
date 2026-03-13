@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, ButtonGroup, Button, Spinner, Form } from 'react-bootstrap';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import { getHistoricalData, getStockQuote, type StockQuote } from '../services/stockService';
+import { getHistoricalData, getStockQuote, searchStocks, type StockQuote } from '../services/stockService';
 
 const TIME_RANGES = [
     { label: '1W', value: '1w' },
@@ -11,17 +11,10 @@ const TIME_RANGES = [
     { label: '1Y', value: '1y' }
 ];
 
-// Predefined popular stocks for the dropdown
-const POPULAR_STOCKS = [
-    { symbol: 'SPY', name: 'S&P 500 ETF' },
-    { symbol: 'QQQ', name: 'Invesco QQQ Trust' },
-    { symbol: 'AAPL', name: 'Apple Inc.' },
-    { symbol: 'MSFT', name: 'Microsoft Corp.' },
-    { symbol: 'TSLA', name: 'Tesla Inc.' },
-    { symbol: 'NVDA', name: 'Nvidia Corp.' },
-];
-
 const StockChart = () => {
+    const [searchInput, setSearchInput] = useState('SPY');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searching, setSearching] = useState(false);
     const [symbol, setSymbol] = useState('SPY');
     const [range, setRange] = useState('1m');
     const [data, setData] = useState<any[]>([]);
@@ -33,6 +26,27 @@ const StockChart = () => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [symbol, range]);
+
+    // Handle real-time search
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(async () => {
+            if (searchInput.length >= 2 && searchInput !== symbol) {
+                try {
+                    setSearching(true);
+                    const res = await searchStocks(searchInput);
+                    setSearchResults(res.data);
+                } catch (err) {
+                    console.error('Search failed', err);
+                } finally {
+                    setSearching(false);
+                }
+            } else {
+                setSearchResults([]);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchInput, symbol]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -61,6 +75,12 @@ const StockChart = () => {
         }
     };
 
+    const handleSelectStock = (selectedSymbol: string) => {
+        setSymbol(selectedSymbol.toUpperCase());
+        setSearchInput(selectedSymbol.toUpperCase());
+        setSearchResults([]);
+    };
+
     // Calculate price change across the selected period
     const startPrice = data.length > 0 ? data[0].price : 0;
     const currentPrice = quote?.regularMarketPrice || (data.length > 0 ? data[data.length - 1].price : 0);
@@ -84,19 +104,70 @@ const StockChart = () => {
 
     return (
         <Card className="border-0 shadow-sm rounded-4 mb-4">
-            <Card.Body className="p-4">
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                    <div className="d-flex align-items-center gap-3">
-                        <Form.Select
-                            value={symbol}
-                            onChange={(e) => setSymbol(e.target.value)}
-                            className="w-auto fw-bold py-2 shadow-none bg-light border-0 rounded-pill px-4"
-                            style={{ minWidth: '150px' }}
-                        >
-                            {POPULAR_STOCKS.map(s => (
-                                <option key={s.symbol} value={s.symbol}>{s.symbol} - {s.name}</option>
-                            ))}
-                        </Form.Select>
+            <Card.Body className="p-4 d-flex flex-column" style={{ minWidth: 0 }}>
+                <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 w-100">
+                    <div className="d-flex flex-wrap align-items-center gap-3">
+                        <div className="position-relative">
+                            <Form onSubmit={(e) => { e.preventDefault(); handleSelectStock(searchInput); }} className="d-flex gap-2">
+                                <Form.Control
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    placeholder="Enter symbol (e.g. AAPL)"
+                                    className="fw-bold py-2 shadow-none bg-light border-0 rounded-pill px-4"
+                                    style={{ maxWidth: '180px' }}
+                                />
+                                <Button type="submit" variant="primary" className="rounded-pill px-3">Search</Button>
+                            </Form>
+
+                            {/* Search Results Dropdown */}
+                            {(searchResults.length > 0 || searching) && (
+                                <div
+                                    className="position-absolute mt-2 bg-white shadow-lg rounded-4 overflow-hidden border-0"
+                                    style={{ zIndex: 1000, top: '100%', left: 0, minWidth: '320px' }}
+                                >
+                                    {searching ? (
+                                        <div className="p-4 text-center">
+                                            <Spinner size="sm" animation="border" variant="primary" />
+                                            <div className="small text-muted mt-2">Searching markets...</div>
+                                        </div>
+                                    ) : (
+                                        <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                                            {searchResults.map((stock) => (
+                                                <div
+                                                    key={stock.symbol}
+                                                    className="d-flex align-items-center justify-content-between p-3 border-bottom hover-bg-light transition-all"
+                                                    onClick={() => handleSelectStock(stock.symbol)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <div className="me-3 overflow-hidden">
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            <span className="fw-bold text-primary">{stock.symbol}</span>
+                                                            {stock.exchDisp && (
+                                                                <span className="badge bg-light text-dark fw-normal border" style={{ fontSize: '0.7rem' }}>
+                                                                    {stock.exchDisp}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="small text-muted text-truncate" style={{ maxWidth: '180px' }}>
+                                                            {stock.shortname || stock.longname || '—'}
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        variant="outline-primary"
+                                                        size="sm"
+                                                        className="rounded-pill px-3 py-1"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                    >
+                                                        View
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         {quote && !loading && (
                             <div className="d-flex align-items-center gap-2">

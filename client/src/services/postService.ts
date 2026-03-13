@@ -12,6 +12,7 @@ export interface Post {
     image?: string; // Post image URL
     likes: string[]; // Array of user IDs
     comments: string[]; // Array of specific comments IDs
+    commentCount?: number; // Virtual field from backend
     createdAt: string;
 }
 
@@ -53,4 +54,16 @@ export const likePost = async (postId: string) => {
 
 export const unlikePost = async (postId: string) => {
     return api.delete(`/posts/${postId}/like`);
+};
+
+export const updatePost = async (postId: string, postData: FormData) => {
+    return api.put<Post>(`/posts/${postId}`, postData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+};
+
+export const deletePost = async (postId: string) => {
+    return api.delete(`/posts/${postId}`);
 };

@@ -30,8 +30,9 @@ const getHistory = async (req: Request, res: Response) => {
         const symbol = req.params.symbol as string;
         const { range } = req.query; // e.g. '1w', '1m', '6m', '1y'
 
-        const now = new Date();
-        let period1 = new Date();
+        let now = new Date();
+
+        let period1 = new Date(now);
         let interval: '1d' | '1wk' | '1mo' = '1d';
 
         switch (range) {
@@ -70,14 +71,15 @@ const createAlert = async (req: Request, res: Response) => {
         const { symbol, targetPrice, condition } = req.body;
         const userId = (req as AuthRequest).user?._id;
 
-        if (!symbol || !targetPrice || !condition) {
-            return res.status(400).json({ message: "Missing fields" });
+        if (!symbol || targetPrice === undefined || !condition) {
+            return res.status(400).json({ message: "Missing fields in alert creation" });
         }
 
-        const alert = await stockService.createAlert(userId!, symbol, targetPrice, condition);
+        const alert = await stockService.createAlert(userId!, symbol, Number(targetPrice), condition);
         res.status(201).json(alert);
-    } catch (err) {
-        res.status(500).json({ message: 'Could not create alert. Please try again.', code: 500 });
+    } catch (err: any) {
+        console.error('Error creating alert:', err);
+        res.status(500).json({ message: err.message || 'Could not create alert. Please try again.', code: 500 });
     }
 };
 
@@ -118,6 +120,16 @@ const updateAlert = async (req: Request, res: Response) => {
     }
 };
 
+const checkAlerts = async (req: Request, res: Response) => {
+    try {
+        console.log('Manual alert check triggered via API');
+        await stockService.checkAlerts();
+        res.status(200).json({ message: "Alert check completed" });
+    } catch (err: any) {
+        res.status(500).json({ message: err.message || 'Alert check failed', code: 500 });
+    }
+};
+
 export default {
     search,
     getQuote,
@@ -125,5 +137,6 @@ export default {
     createAlert,
     getAlerts,
     deleteAlert,
-    updateAlert
+    updateAlert,
+    checkAlerts
 };

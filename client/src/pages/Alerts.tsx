@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Container, Card, Button, Badge, Spinner, Modal, Form, Row, Col } from 'react-bootstrap';
-import { Bell, Trash2, Edit2, TrendingUp, TrendingDown, Plus, AlertCircle } from 'lucide-react';
+import { Bell, Trash2, Edit2, TrendingUp, TrendingDown, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 import {
     getAlerts, createAlert, deleteAlert, updateAlert, searchStocks, getStockQuote,
     type StockAlert, type StockQuote
 } from '../services/stockService';
+import { API_URL } from '../services/api';
 
 const Alerts = () => {
     const [alerts, setAlerts] = useState<StockAlert[]>([]);
@@ -122,6 +123,23 @@ const Alerts = () => {
         }
     };
 
+    const handleTriggerCheck = async () => {
+        try {
+            setLoading(true);
+            await fetch(`${API_URL}/stocks/check-alerts`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                }
+            });
+            await fetchAlerts();
+        } catch (err) {
+            console.error('Failed to trigger check', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDeleteAlert = async (id: string) => {
         try {
             await deleteAlert(id);
@@ -142,13 +160,24 @@ const Alerts = () => {
                     </h2>
                     <p className="text-muted mb-0">Get notified when stocks hit your target price</p>
                 </div>
-                <Button
-                    variant="primary"
-                    className="d-flex align-items-center gap-2 rounded-pill px-4"
-                    onClick={openCreateModal}
-                >
-                    <Plus size={18} /> New Alert
-                </Button>
+                <div className="d-flex gap-2">
+                    <Button
+                        variant="outline-secondary"
+                        className="d-flex align-items-center gap-2 rounded-pill px-3"
+                        onClick={handleTriggerCheck}
+                        disabled={loading}
+                    >
+                        <RefreshCw size={16} className={loading ? 'spin-animation' : ''} />
+                        Refresh Status
+                    </Button>
+                    <Button
+                        variant="primary"
+                        className="d-flex align-items-center gap-2 rounded-pill px-4"
+                        onClick={openCreateModal}
+                    >
+                        <Plus size={18} /> New Alert
+                    </Button>
+                </div>
             </div>
 
             {/* Stats */}
@@ -224,24 +253,24 @@ const Alerts = () => {
                                         </div>
                                         <div className="d-flex gap-2">
                                             <Button
-                                                variant="light"
+                                                variant="primary"
                                                 size="sm"
-                                                className="rounded-circle d-flex align-items-center justify-content-center"
-                                                style={{ width: '36px', height: '36px' }}
+                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm"
+                                                style={{ width: '40px', height: '40px', backgroundColor: '#0d6efd' }}
                                                 onClick={() => openEditModal(alert)}
                                                 title="Edit alert"
                                             >
-                                                <Edit2 size={14} />
+                                                <Edit2 size={20} color="white" strokeWidth={2.5} />
                                             </Button>
                                             <Button
-                                                variant="light"
+                                                variant="danger"
                                                 size="sm"
-                                                className="rounded-circle d-flex align-items-center justify-content-center text-danger"
-                                                style={{ width: '36px', height: '36px' }}
+                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm"
+                                                style={{ width: '40px', height: '40px', backgroundColor: '#dc3545' }}
                                                 onClick={() => handleDeleteAlert(alert._id)}
                                                 title="Delete alert"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={20} color="white" strokeWidth={2.5} />
                                             </Button>
                                         </div>
                                     </Card.Body>
@@ -272,13 +301,13 @@ const Alerts = () => {
                                             </div>
                                         </div>
                                         <Button
-                                            variant="light"
+                                            variant="danger"
                                             size="sm"
-                                            className="rounded-circle d-flex align-items-center justify-content-center text-danger"
-                                            style={{ width: '36px', height: '36px' }}
+                                            className="rounded-3 d-flex align-items-center justify-content-center border-0"
+                                            style={{ width: '40px', height: '40px', opacity: 0.8 }}
                                             onClick={() => handleDeleteAlert(alert._id)}
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={20} color="white" strokeWidth={2.5} />
                                         </Button>
                                     </Card.Body>
                                 </Card>
