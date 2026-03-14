@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Capability Checks
+echo "--- Checking Server Capabilities ---"
+for cmd in docker git node npm; do
+    if command -v $cmd &> /dev/null; then
+        echo "✅ $cmd is installed: $($cmd --version | head -n 1)"
+    else
+        echo "❌ $cmd is NOT installed!"
+    fi
+done
+echo "------------------------------------"
+
+# Configuration
 # MarketWatchWeb - Self-Hosted Runner Setup Script
 # Run this on the node65 server
 
