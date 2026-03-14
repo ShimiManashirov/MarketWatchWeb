@@ -22,4 +22,4 @@ jobs:
           source_branch: "main"
           pr_title: "Release: Merge main into production"
           pr_body: "Automated PR from main to prod branch."
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PR_TOKEN || secrets.GITHUB_TOKEN }}
