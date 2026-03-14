@@ -5,7 +5,7 @@ import User from '../models/user_model';
 import Post from '../models/post_model';
 import Comment from '../models/comment_model';
 
-const TEST_DB_URI = 'mongodb://127.0.0.1:27017/market_watch_test_db';
+const TEST_DB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_test_db';
 
 beforeAll(async () => {
     if (mongoose.connection.readyState === 0) {

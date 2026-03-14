@@ -161,8 +161,7 @@
  *         description: Redirect to frontend with tokens
  */
 
-/**
- * @swagger
+/*
  * /auth/facebook:
  *   get:
  *     summary: Initiate Facebook OAuth
@@ -172,10 +171,7 @@
  *     responses:
  *       302:
  *         description: Redirect to Facebook
- */
-
-/**
- * @swagger
+ *
  * /auth/facebook/callback:
  *   get:
  *     summary: Facebook OAuth callback
