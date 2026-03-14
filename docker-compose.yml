@@ -6,8 +6,16 @@ services:
     container_name: market_watch_db
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=market_watch_pass
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
@@ -15,10 +23,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/market_watch_db
+      - MONGO_URI=mongodb://admin:market_watch_pass@mongodb:27017/market_watch_db?authSource=admin
       - NODE_ENV=production
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     env_file:
       - .env
 
