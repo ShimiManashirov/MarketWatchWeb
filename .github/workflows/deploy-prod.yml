@@ -30,6 +30,6 @@ jobs:
 
     - name: Build and Restart with Docker Compose
       run: |
-        sudo docker compose down
-        sudo docker compose up --build -d
-        sudo docker system prune -f
+        docker compose down
+        docker compose up --build -d
+        docker system prune -f
