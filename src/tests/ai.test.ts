@@ -4,7 +4,7 @@ import app from '../app';
 import User from '../models/user_model';
 import Post from '../models/post_model';
 
-const TEST_DB_URI = 'mongodb://127.0.0.1:27017/market_watch_test_db';
+const TEST_DB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_test_db';
 
 // Check if Gemini API key is configured
 const hasGeminiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here';

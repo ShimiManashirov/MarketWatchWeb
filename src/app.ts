@@ -83,7 +83,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 import path from 'path';
 
-// ... (keep routes)
+// Serving the frontend is handled below in the production check
 
 // Serve frontend static files
 if (process.env.NODE_ENV !== 'development') {
@@ -91,7 +91,8 @@ if (process.env.NODE_ENV !== 'development') {
 
   // SPA Fallback: generic middleware to avoid Express 5 path restrictions
   app.use((req, res, next) => {
-    if (req.method === 'GET' && req.accepts('html')) {
+    // Only handle GET requests that are not for API routes and accept HTML
+    if (req.method === 'GET' && !req.url.startsWith('/api') && !req.url.startsWith('/auth') && req.accepts('html')) {
       res.sendFile(path.join(__dirname, '../client/dist/index.html'));
     } else {
       next();

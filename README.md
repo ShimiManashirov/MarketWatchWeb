@@ -207,6 +207,48 @@ npm run build
 npm start
 ```
 
+## 🔄 CI/CD & Deployment Flow
+
+We use a **Lean Deployment Strategy** designed for the college server (`node65`). This flow ensures high code quality while minimizing server resource usage.
+
+### 🌊 Branching Strategy
+- **`main`**: Development branch. All logic tests and builds are verified here in the GitHub Cloud.
+- **`production`**: Live branch. Only tested, production-ready code is merged here.
+
+### 🛠️ Automated Workflow Diagram
+
+```mermaid
+graph TD
+    A[Local Development] -->|Push| B(Main Branch)
+    B -->|GitHub Actions CI| C{Tests & Build Pass?}
+    C -->|Yes| D[Auto-Create PR to Production]
+    C -->|No| E[Fix Bugs]
+    D -->|Manual Review| F(Merge to Production)
+    F -->|Self-Hosted Runner| G[College Server: node65]
+    G -->|Lean Deploy| H[Build & Restart Containers]
+    G -->|Cleanup| I[Prune Old Docker Images]
+    
+    subgraph GitHub Cloud
+    B
+    C
+    D
+    end
+    
+    subgraph College Server
+    G
+    H
+    I
+    end
+```
+
+### 🚀 Key Features
+1. **Cloud-First Testing**: Heavy logic tests run on GitHub's infrastructure, not the college server.
+2. **Self-Hosted Runner**: The server securely "calls" GitHub for updates; no open inbound ports required.
+3. **Automatic Sync**: Hotfixes pushed directly to `production` are automatically synced back to `main`.
+4. **Manual Gate**: All production deployments require a human to merge the PR, providing total control for presentations.
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository
