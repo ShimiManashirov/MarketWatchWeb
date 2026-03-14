@@ -32,7 +32,7 @@ jobs:
     - name: Run tests
       run: npm test
       env:
-        MONGO_URI: ${{ secrets.MONGO_URI }}
+        MONGO_URI: mongodb://localhost:27017/test_db
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
         PORT: ${{ vars.PORT || 3000 }}
