@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use environment variable or fallback to localhost
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Use environment variable or fallback to current origin for production readiness
+export const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const getImageUrl = (path: string | undefined): string | undefined => {
     if (!path) return undefined;
