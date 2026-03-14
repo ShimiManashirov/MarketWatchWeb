@@ -3,6 +3,7 @@ name: Automated PR (Main to Prod)
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   create-pr:
@@ -13,8 +14,8 @@ jobs:
       - name: Create or Update Pull Request
         uses: repo-sync/pull-request@v2
         with:
-          destination_branch: "prod"
+          destination_branch: "production"
           source_branch: "main"
-          pr_title: "Release: Merge main into prod"
+          pr_title: "Release: Merge main into production"
           pr_body: "Automated PR from main to prod branch."
           github_token: ${{ secrets.GITHUB_TOKEN }}
