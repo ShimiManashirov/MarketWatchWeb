@@ -161,6 +161,7 @@
  *         description: Redirect to frontend with tokens
  */
 
+/*
 /**
  * @swagger
  * /auth/facebook:
@@ -186,6 +187,7 @@
  *       302:
  *         description: Redirect to frontend with tokens
  */
+*/
 
 /**
  * @swagger

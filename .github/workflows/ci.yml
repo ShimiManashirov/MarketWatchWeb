@@ -39,8 +39,6 @@ jobs:
         NODE_ENV: test
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
-        FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 

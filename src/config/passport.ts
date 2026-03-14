@@ -39,6 +39,7 @@ export const setupPassport = (): void => {
         )
     );
 
+    /*
     // Facebook OAuth Strategy
     passport.use(
         new FacebookStrategy(
@@ -73,6 +74,7 @@ export const setupPassport = (): void => {
             }
         )
     );
+    */
 
     // Serialize user for session
     passport.serializeUser((user: any, done) => {

@@ -158,10 +158,7 @@ router.get('/google/callback',
     }
 );
 
-/**
- * @route GET /auth/facebook
- * @desc Initiate Facebook OAuth
- */
+/*
 router.get('/facebook',
     passport.authenticate('facebook', {
         scope: ['email'],
@@ -169,17 +166,12 @@ router.get('/facebook',
     })
 );
 
-/**
- * @route GET /auth/facebook/callback
- * @desc Facebook OAuth callback
- */
 router.get('/facebook/callback',
     passport.authenticate('facebook', {
         session: false,
         failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login`
     }),
     (req: any, res) => {
-        // Generate JWT tokens for the authenticated user
         const user = req.user;
         const accessToken = jwt.sign(
             { _id: user._id },
@@ -192,15 +184,14 @@ router.get('/facebook/callback',
             { expiresIn: '7d' }
         );
 
-        // Save refresh token to user
         user.refreshTokens = user.refreshTokens || [];
         user.refreshTokens.push(refreshToken);
         user.save();
 
-        // Redirect to frontend with tokens
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
         res.redirect(`${clientUrl}/auth/success?accessToken=${accessToken}&refreshToken=${refreshToken}`);
     }
 );
+*/
 
 export default router;
