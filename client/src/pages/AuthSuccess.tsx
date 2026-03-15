@@ -1,39 +1,54 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Spinner, Container } from 'react-bootstrap';
+import api from '../services/api';
 
 const AuthSuccess = () => {
     const [searchParams] = useSearchParams();
     const { login } = useAuth();
     const navigate = useNavigate();
+    const processed = useRef(false);
 
     useEffect(() => {
-        const accessToken = searchParams.get('accessToken');
-        const refreshToken = searchParams.get('refreshToken');
+        // Prevent double-processing in React StrictMode
+        if (processed.current) return;
+        processed.current = true;
 
-        if (accessToken && refreshToken) {
-            // We don't have the user object here, so we login with placeholders
-            // and relying on AuthContext to fetch the profile on mount or we can force fetch here.
+        const processAuth = async () => {
+            const accessToken = searchParams.get('accessToken');
+            const refreshToken = searchParams.get('refreshToken');
 
-            // For now, let's just set tokens and redirect to home.
-            // The AuthContext effect will likely run or we can trigger a fetch.
-            // Check AuthContext implementation: it checks localStorage on mount.
-            // Since we are already mounted, we might need a way to trigger fetch.
-            // But 'login' function sets state. 
+            if (accessToken && refreshToken) {
+                // Store tokens so the API interceptor can use them
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
 
-            login({ _id: 'oauth', username: 'Loading...', email: '' }, accessToken, refreshToken);
+                try {
+                    // Fetch the real user profile
+                    const res = await api.get('/user/profile');
+                    login(res.data, accessToken, refreshToken);
+                } catch (err) {
+                    console.error('Failed to fetch profile after OAuth:', err);
+                    // Login with minimal data — the app will retry on next load
+                    login({ _id: '', username: 'User', email: '' }, accessToken, refreshToken);
+                }
 
-            // Allow a brief moment for state to update or just redirect
-            navigate('/');
-        } else {
-            navigate('/login');
-        }
-    }, [searchParams, login, navigate]);
+                navigate('/', { replace: true });
+            } else {
+                navigate('/login', { replace: true });
+            }
+        };
+
+        processAuth();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <Container className="d-flex justify-content-center align-items-center vh-100">
-            <Spinner animation="border" variant="primary" />
+            <div className="text-center">
+                <Spinner animation="border" variant="primary" />
+                <p className="text-muted mt-3">Signing you in...</p>
+            </div>
         </Container>
     );
 };
