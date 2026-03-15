@@ -1,8 +1,38 @@
+import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Container, Navbar, Nav, Dropdown, Image } from 'react-bootstrap';
 import { LogOut, Search, PlusCircle, Home, TrendingUp, User, Bell } from 'lucide-react';
 import { getImageUrl } from '../services/api';
+
+const ProfileAvatar = ({ user }: { user: any }) => {
+    const [imageError, setImageError] = useState(false);
+    
+    // Check if the image string is valid
+    const hasValidImageStr = user?.image && user.image !== 'null' && user.image !== 'undefined';
+    
+    if (hasValidImageStr && !imageError) {
+        return (
+            <Image
+                src={getImageUrl(user.image)}
+                roundedCircle
+                width={40}
+                height={40}
+                className="border"
+                style={{ objectFit: 'cover' }}
+                referrerPolicy="no-referrer"
+                onError={() => setImageError(true)}
+            />
+        );
+    }
+    
+    // Fallback UI
+    return (
+        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '40px', height: '40px' }}>
+            <User size={24} className="text-muted" />
+        </div>
+    );
+};
 
 const Layout = () => {
     const { user, logout } = useAuth();
@@ -66,20 +96,7 @@ const Layout = () => {
 
                             <Dropdown align="end">
                                 <Dropdown.Toggle variant="transparent" className="p-0 border-0 no-arrow after-none">
-                                    {user?.image ? (
-                                        <Image
-                                            src={getImageUrl(user.image)}
-                                            roundedCircle
-                                            width={40}
-                                            height={40}
-                                            className="border"
-                                            style={{ objectFit: 'cover' }}
-                                        />
-                                    ) : (
-                                        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '40px', height: '40px' }}>
-                                            <User size={24} className="text-muted" />
-                                        </div>
-                                    )}
+                                    <ProfileAvatar user={user} />
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu className="shadow border-0 rounded-4 mt-2 p-2">
