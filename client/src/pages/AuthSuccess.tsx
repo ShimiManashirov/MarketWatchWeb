@@ -2,11 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Spinner, Container } from 'react-bootstrap';
-import api from '../services/api';
 
 const AuthSuccess = () => {
     const [searchParams] = useSearchParams();
-    const { login } = useAuth();
+    const { refreshProfile } = useAuth();
     const navigate = useNavigate();
     const processed = useRef(false);
 
@@ -24,15 +23,8 @@ const AuthSuccess = () => {
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken);
 
-                try {
-                    // Fetch the real user profile
-                    const res = await api.get('/user/profile');
-                    login(res.data, accessToken, refreshToken);
-                } catch (err) {
-                    console.error('Failed to fetch profile after OAuth:', err);
-                    // Login with minimal data — the app will retry on next load
-                    login({ _id: '', username: 'User', email: '' }, accessToken, refreshToken);
-                }
+                // Fetch the real user profile and update auth state
+                await refreshProfile();
 
                 navigate('/', { replace: true });
             } else {
