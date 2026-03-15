@@ -3,8 +3,8 @@ import axios from 'axios';
 // Use environment variable or fallback to current origin for production readiness
 export const API_URL = import.meta.env.VITE_API_URL || '';
 
-export const getImageUrl = (path: string | undefined): string | undefined => {
-    if (!path) return undefined;
+export const getImageUrl = (path: string | undefined | null): string | undefined => {
+    if (!path || path === 'null' || path === 'undefined') return undefined;
     if (path.startsWith('http')) return path;
 
     // Normalize Windows backslashes to forward slashes
