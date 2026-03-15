@@ -138,12 +138,12 @@ router.get('/google/callback',
         const user = req.user;
         const accessToken = jwt.sign(
             { _id: user._id },
-            process.env.JWT_SECRET || 'fallback-secret',
+            process.env.JWT_SECRET || 'test_secret',
             { expiresIn: '1h' }
         );
         const refreshToken = jwt.sign(
             { _id: user._id },
-            process.env.REFRESH_TOKEN_SECRET || 'fallback-refresh-secret',
+            process.env.REFRESH_TOKEN_SECRET || 'test_refresh_secret',
             { expiresIn: '7d' }
         );
 
