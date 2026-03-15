@@ -1,278 +1,275 @@
-# MarketWatchWeb - Financial Social Media Platform
+# 📈 MarketWatch — Financial Social Media Platform
 
-A full-featured social media backend for financial discussions with AI-powered smart search, built with Node.js, TypeScript, Express, and MongoDB.
+A full-stack social media platform for financial discussions, featuring real-time stock tracking, AI-powered smart search, Google OAuth, and an automated CI/CD pipeline with Docker deployment.
+
+**Live at:** `https://node65.cs.colman.ac.il`
+
+---
 
 ## 🚀 Features
 
-### Core Features
-- ✅ **User Authentication** - Secure registration, login, logout with JWT
-- ✅ **User Profiles** - Profile management with image upload
-- ✅ **Posts** - Create, read, update, delete posts with images
-- ✅ **Likes** - Like/unlike posts with duplicate prevention
-- ✅ **Comments** - Full CRUD operations on post comments
-- ✅ **AI Smart Search** - Gemini-powered financial analysis and intelligent search
+### 📱 Application
+| Feature | Description |
+|---|---|
+| **User Authentication** | JWT-based auth with access + refresh tokens, Google OAuth 2.0 |
+| **Social Feed** | Create, read, update, delete posts with image uploads |
+| **Comments & Likes** | Full CRUD comments, like/unlike with duplicate prevention |
+| **User Profiles** | Profile management with avatar upload |
+| **Stock Watchlist** | Track stocks and monitor price changes |
+| **Price Alerts** | Set target price alerts with real-time status |
+| **AI Smart Search** | Google Gemini-powered financial analysis and intelligent search |
+| **Responsive Frontend** | React + Vite SPA with Bootstrap UI |
 
-### Security
-- 🔒 JWT-based authentication with refresh tokens
-- 🔒 Password hashing with bcrypt
-- 🔒 Ownership validation on all protected operations
-- 🔒 File upload restrictions (images only, 5MB limit)
-- 🔒 Input validation and sanitization
+### 🔒 Security
+- JWT access + refresh token rotation
+- Password hashing with bcrypt
+- Ownership validation on all protected operations
+- File upload restrictions (images only, 5MB limit)
+- Helmet security headers & rate limiting
+- HTTPS with SSL/TLS (Nginx reverse proxy)
 
-## 📊 Test Coverage
+---
 
-**50 tests, all passing ✅**
-- 7 Authentication tests
-- 4 User profile tests
-- 19 Post tests (including likes)
-- 13 Comment tests
-- 7 AI tests (with mocked Gemini service)
+## 🛠 Tech Stack
 
-## 🛠️ Tech Stack
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18, TypeScript, Vite, Bootstrap |
+| **Backend** | Node.js, Express.js, TypeScript |
+| **Database** | MongoDB with Mongoose ODM |
+| **AI** | Google Gemini API |
+| **Auth** | JWT + Passport.js (Google OAuth 2.0) |
+| **Testing** | Jest + Supertest |
+| **DevOps** | Docker, Docker Compose, GitHub Actions, Nginx |
+| **Server** | Ubuntu 24.04 LTS (Self-hosted runner on college server) |
 
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT (jsonwebtoken)
-- **AI**: Google Gemini API
-- **File Upload**: Multer
-- **Testing**: Jest + Supertest
-- **Password Hashing**: bcryptjs
+---
 
-## 📦 Installation
+## 📦 Quick Start
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (running locally or remote)
-- Google Gemini API key (for AI features)
+- Node.js v20+
+- Docker & Docker Compose
+- MongoDB (local or Docker)
+- Google Gemini API key
 
-### Setup
+### Local Development
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ShimiManashirov/MarketWatchWeb.git
-   cd MarketWatchWeb
-   ```
+```bash
+# 1. Clone
+git clone https://github.com/ShimiManashirov/MarketWatchWeb.git
+cd MarketWatchWeb
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+# 2. Install dependencies
+npm install
+cd client && npm install && cd ..
 
-3. **Configure environment variables**
-   
-   Create a `.env` file in the root directory:
-   ```env
-   MONGO_URI=mongodb://127.0.0.1:27017/market_watch_db
-   JWT_SECRET=your-secret-key-here
-   REFRESH_TOKEN_SECRET=your-refresh-secret-here
-   GEMINI_API_KEY=your-gemini-api-key-here
-   PORT=3000
-   ```
+# 3. Configure environment
+cp .env.example .env   # Edit with your values
 
-4. **Build the project**
-   ```bash
-   npm run build
-   ```
+# 4. Start with Docker
+docker compose up --build -d
 
-5. **Run tests**
-   ```bash
-   npm test
-   ```
+# 5. Or start without Docker
+npm run dev             # Backend on :3000
+cd client && npm run dev  # Frontend on :5173
+```
 
-6. **Start the server**
-   ```bash
-   npm run dev
-   ```
+### Environment Variables
 
-   The server will start on `http://localhost:3000`
+| Variable | Description | Required |
+|---|---|---|
+| `MONGO_URI` | MongoDB connection string | ✅ |
+| `JWT_SECRET` | Secret for access tokens | ✅ |
+| `REFRESH_TOKEN_SECRET` | Secret for refresh tokens | ✅ |
+| `GEMINI_API_KEY` | Google Gemini API key | ✅ |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | ✅ |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | ✅ |
+| `GOOGLE_CALLBACK_URL` | Google OAuth callback URL | ✅ |
+| `CLIENT_URL` | Frontend URL for CORS & redirects | ✅ |
+| `PORT` | Server port (default: 3000) | ❌ |
 
-## 📚 API Documentation
-
-### Authentication (`/auth`)
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - Login and get tokens
-- `POST /auth/logout` - Logout (invalidate refresh token)
-- `POST /auth/refresh` - Refresh access token
-
-### User (`/user`)
-- `GET /user/profile` - Get current user profile
-- `PUT /user/update` - Update profile (username, image)
-
-### Posts (`/posts`)
-- `POST /posts` - Create post
-- `GET /posts` - Get all posts
-- `GET /posts/:id` - Get specific post
-- `GET /posts/owner/:ownerId` - Get posts by user
-- `GET /posts/my-posts` - Get current user's posts
-- `PUT /posts/:id` - Update post (owner only)
-- `DELETE /posts/:id` - Delete post (owner only)
-- `POST /posts/:id/like` - Like a post
-- `DELETE /posts/:id/like` - Unlike a post
-
-### Comments
-- `POST /posts/:postId/comments` - Create comment
-- `GET /posts/:postId/comments` - Get all comments for post
-- `PUT /comments/:id` - Update comment (owner only)
-- `DELETE /comments/:id` - Delete comment (owner only)
-
-### AI Features (`/ai`)
-- `POST /ai/analyze` - Analyze financial query with AI
-- `POST /ai/search` - Smart search with keyword extraction
-- `POST /ai/suggestions` - Generate post title suggestions
-- `GET /ai/analyze-post/:postId` - Analyze post sentiment and topics
-
-## 📖 Detailed Documentation
-
-- [POST_API.md](./POST_API.md) - Posts and likes documentation
-- [COMMENT_API.md](./COMMENT_API.md) - Comments documentation
-- [AI_API.md](./AI_API.md) - AI features documentation
+---
 
 ## 🧪 Testing
 
-Run all tests:
 ```bash
+# Run all tests (46 tests)
 npm test
+
+# Run specific suites
+npm test -- auth.test.ts      # 7 auth tests
+npm test -- user.test.ts      # 4 user profile tests
+npm test -- post.test.ts      # 19 post + like tests
+npm test -- comment.test.ts   # 13 comment tests
+npm test -- ai.test.ts        # 3 AI tests
 ```
 
-Run specific test suite:
-```bash
-npm test -- auth.test.ts
-npm test -- post.test.ts
-npm test -- comment.test.ts
-npm test -- ai.test.ts
-```
+---
 
-## 📁 Project Structure
+## 📚 API Documentation
 
-```
-MarketWatchWeb/
-├── src/
-│   ├── controllers/      # Request handlers
-│   │   ├── auth_controller.ts
-│   │   ├── user_controller.ts
-│   │   ├── post_controller.ts
-│   │   ├── comment_controller.ts
-│   │   └── ai_controller.ts
-│   ├── models/          # Database schemas
-│   │   ├── user_model.ts
-│   │   ├── post_model.ts
-│   │   └── comment_model.ts
-│   ├── routes/          # API routes
-│   │   ├── auth_routes.ts
-│   │   ├── user_routes.ts
-│   │   ├── post_routes.ts
-│   │   ├── comment_routes.ts
-│   │   └── ai_routes.ts
-│   ├── middleware/      # Custom middleware
-│   │   ├── auth_middleware.ts
-│   │   └── file_middleware.ts
-│   ├── services/        # Business logic
-│   │   └── gemini_service.ts
-│   ├── tests/           # Test files
-│   │   ├── auth.test.ts
-│   │   ├── user.test.ts
-│   │   ├── post.test.ts
-│   │   ├── comment.test.ts
-│   │   └── ai.test.ts
-│   ├── app.ts           # Express app setup
-│   └── server.ts        # Server entry point
-├── .env                 # Environment variables
-├── .gitignore          # Git ignore rules
-├── package.json        # Dependencies
-├── tsconfig.json       # TypeScript config
-└── jest.config.ts      # Jest config
-```
+Swagger UI is available at `/api-docs` when the server is running.
 
-## 🔑 Getting a Gemini API Key
+### Endpoints
 
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the key and add it to your `.env` file
+| Route | Methods | Description |
+|---|---|---|
+| `/auth/register` | POST | Register new user |
+| `/auth/login` | POST | Login, returns JWT tokens |
+| `/auth/logout` | POST | Invalidate refresh token |
+| `/auth/refresh` | POST | Refresh access token |
+| `/auth/google` | GET | Initiate Google OAuth |
+| `/auth/google/callback` | GET | Google OAuth callback |
+| `/user/profile` | GET | Get current user profile |
+| `/user/update` | PUT | Update profile |
+| `/posts` | GET, POST | List/create posts |
+| `/posts/:id` | GET, PUT, DELETE | Read/update/delete post |
+| `/posts/:id/like` | POST, DELETE | Like/unlike post |
+| `/posts/:postId/comments` | GET, POST | List/create comments |
+| `/comments/:id` | PUT, DELETE | Update/delete comment |
+| `/ai/analyze` | POST | AI financial analysis |
+| `/ai/search` | POST | Smart search with keyword extraction |
+| `/stocks/search` | GET | Search stocks |
+| `/watchlist` | GET, POST, DELETE | Manage watchlist |
 
-## 🚀 Deployment
+---
 
-### Environment Variables for Production
-Make sure to set these in your production environment:
-- `MONGO_URI` - Your MongoDB connection string
-- `JWT_SECRET` - Strong secret for access tokens
-- `REFRESH_TOKEN_SECRET` - Strong secret for refresh tokens
-- `GEMINI_API_KEY` - Your Gemini API key
-- `PORT` - Server port (default: 3000)
+## 🔄 CI/CD & DevOps Architecture
 
-### Build for Production
-```bash
-npm run build
-npm start
-```
-
-## 🔄 CI/CD & Deployment Flow
-
-We use a **Lean Deployment Strategy** designed for the college server (`node65`). This flow ensures high code quality while minimizing server resource usage.
+We use a **Lean Deployment Strategy** designed for a resource-constrained college server. Heavy CI runs in the GitHub Cloud; only deployment runs on the server.
 
 ### 🌊 Branching Strategy
-- **`main`**: Development branch. All logic tests and builds are verified here in the GitHub Cloud.
-- **`production`**: Live branch. Only tested, production-ready code is merged here.
 
-### 🛠️ Automated Workflow Diagram
+| Branch | Purpose | Trigger |
+|---|---|---|
+| `main` | Development & CI | PRs trigger test suite |
+| `production` | Live deployment | Push triggers Docker deploy |
+| `feature/*` | New features | PR to `main` |
+| `fix/*` | Bug fixes | PR to `main` |
+
+### 🛠 Automated Pipeline
 
 ```mermaid
 graph TD
-    A[Local Development] -->|Push| B(Main Branch)
-    B -->|GitHub Actions CI| C{Tests & Build Pass?}
-    C -->|Yes| D[Auto-Create PR to Production]
-    C -->|No| E[Fix Bugs]
-    D -->|Manual Review| F(Merge to Production)
-    F -->|Self-Hosted Runner| G[College Server: node65]
-    G -->|Lean Deploy| H[Build & Restart Containers]
-    G -->|Cleanup| I[Prune Old Docker Images]
+    A[Developer Push] -->|PR| B(main branch)
+    B -->|GitHub Actions| C{CI: Tests & Build}
+    C -->|✅ Pass| D[Auto PR: main → production]
+    C -->|❌ Fail| E[Fix & Re-push]
+    D -->|Human Review| F[Merge to production]
+    F -->|Self-Hosted Runner| G[NODE65 Server]
+    G --> H[Docker Compose Build]
+    H --> I[App + MongoDB Live]
     
-    subgraph GitHub Cloud
+    J[Hotfix on production] -->|Auto Sync| K[PR: production → main]
+    
+    subgraph "☁️ GitHub Cloud"
     B
     C
     D
+    K
     end
     
-    subgraph College Server
+    subgraph "🏫 College Server (node65)"
     G
     H
     I
     end
 ```
 
-### 🚀 Key Features
-1. **Cloud-First Testing**: Heavy logic tests run on GitHub's infrastructure, not the college server.
-2. **Self-Hosted Runner**: The server securely "calls" GitHub for updates; no open inbound ports required.
-3. **Automatic Sync**: Hotfixes pushed directly to `production` are automatically synced back to `main`.
-4. **Manual Gate**: All production deployments require a human to merge the PR, providing total control for presentations.
+### 📋 Workflow Files
+
+| File | Trigger | Runs On | Purpose |
+|---|---|---|---|
+| `ci.yml` | PR to `main` | `ubuntu-latest` | Run tests & build verification |
+| `main-to-prod-pr.yml` | Push to `main` | `ubuntu-latest` | Auto-create PR to `production` |
+| `deploy-prod.yml` | Push to `production` | `self-hosted` (NODE65) | Docker build & deploy |
+| `sync-main.yml` | Push to `production` | `ubuntu-latest` | Sync hotfixes back to `main` via PR |
+
+### 🏗 Infrastructure
+
+```
+                    ┌──────────────────────────────────┐
+                    │      College Server (NODE65)      │
+                    │      Ubuntu 24.04 LTS             │
+                    │                                    │
+  HTTPS (443) ─────►│  Nginx (Reverse Proxy + SSL)      │
+                    │       │                            │
+                    │       ▼                            │
+                    │  Docker Compose                    │
+                    │  ┌─────────────────────────────┐  │
+                    │  │ market_watch_app (:3000)     │  │
+                    │  │ Node.js + Express + React    │  │
+                    │  └──────────┬──────────────────┘  │
+                    │             │                      │
+                    │  ┌──────────▼──────────────────┐  │
+                    │  │ market_watch_db (:27017)     │  │
+                    │  │ MongoDB (with named volume)  │  │
+                    │  └─────────────────────────────┘  │
+                    │                                    │
+                    │  GitHub Actions Runner (service)   │
+                    └──────────────────────────────────┘
+```
+
+### 🔑 Key Design Decisions
+
+1. **Cloud-First Testing** — All 46 tests run on GitHub's infrastructure, not the college server. This saves server resources for the live application.
+
+2. **Self-Hosted Runner as Service** — Installed via `systemd`, the runner starts automatically on server reboot. No manual intervention needed.
+
+3. **Named Docker Volumes** — MongoDB data persists in `mongo_data` volume. `docker compose down` does NOT delete volumes, so **data survives redeployments**.
+
+4. **Hotfix Loop Protection** — The sync workflow detects when a push to `production` originated from `main` and skips the reverse sync, preventing infinite PR loops.
+
+5. **Manual Merge Gate** — All production deployments require a human to merge the PR, providing total control for demos and presentations.
 
 ---
 
-## 🤝 Contributing
+## 📁 Project Structure
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```
+MarketWatchWeb/
+├── .github/workflows/       # CI/CD pipeline definitions
+│   ├── ci.yml               # Test & build on PR
+│   ├── deploy-prod.yml      # Docker deploy on production push
+│   ├── main-to-prod-pr.yml  # Auto PR main → production
+│   └── sync-main.yml        # Hotfix sync production → main
+├── client/                   # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/      # React components
+│   │   ├── pages/           # Page components
+│   │   └── services/        # API service layer
+│   └── dist/                # Production build output
+├── src/                      # Express backend
+│   ├── controllers/         # Request handlers
+│   ├── models/              # Mongoose schemas
+│   ├── routes/              # API route definitions
+│   ├── middleware/          # Auth & file upload middleware
+│   ├── services/            # Business logic (Gemini AI, Cron)
+│   ├── config/              # Passport OAuth config
+│   ├── tests/               # Jest test suites
+│   ├── app.ts               # Express app setup
+│   └── server.ts            # Server entry point
+├── nginx/                    # Nginx reverse proxy config
+├── Dockerfile               # Multi-stage Docker build
+├── docker-compose.yml       # Container orchestration
+├── setup_runner.sh          # Server runner installation script
+└── .env                     # Environment variables (not in git)
+```
 
-## 📝 License
+---
 
-This project is licensed under the ISC License.
+## 👥 Authors
 
-## 👤 Author
-
-**Shimi Manashirov**
-- GitHub: [@ShimiManashirov](https://github.com/ShimiManashirov)
+- **Shimi Manashirov** — [@ShimiManashirov](https://github.com/ShimiManashirov)
+- **Tamir Shoval** — [@Tamir26](https://github.com/Tamir26)
 
 ## 🙏 Acknowledgments
 
 - Google Gemini AI for intelligent search capabilities
-- Express.js community
-- MongoDB team
-- All contributors
+- College of Management (Colman) — CS Faculty for server infrastructure
+- Express.js & React communities
 
 ---
 
-**Built with ❤️ for financial discussions**
+**Built with ❤️ for financial discussions | Colman CS — Internet Systems Development**
