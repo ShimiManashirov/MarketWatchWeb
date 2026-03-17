@@ -20,7 +20,13 @@ const app: Express = express();
 
 // Security Middlewares
 app.use(helmet({
-  crossOriginResourcePolicy: false, // allow images to be served cross origin
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://images.unsplash.com", "https://api.dicebear.com", "https://*.unsplash.com"],
+    },
+  },
 }));
 
 // Rate limiting to prevent brute force / DDoS
