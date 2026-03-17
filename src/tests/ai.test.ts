@@ -9,10 +9,9 @@ const TEST_DB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_w
 
 jest.setTimeout(60000);
 
-// Check if AI API keys are configured
-const hasGeminiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here';
-const hasOpenRouterKey = process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.startsWith('sk-or-');
-const hasAIKey = hasGeminiKey || hasOpenRouterKey;
+// Check if AI API keys are configured correctly
+const isValid = (k: string | undefined) => k && k.length > 10 && !k.includes('your-');
+const hasAIKey = isValid(process.env.GEMINI_API_KEY) || isValid(process.env.OPENROUTER_API_KEY);
 
 beforeAll(async () => {
     if (mongoose.connection.readyState === 0) {

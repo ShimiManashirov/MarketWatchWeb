@@ -17,28 +17,32 @@ class GeminiService {
         const openRouterKey = process.env.OPENROUTER_API_KEY;
         const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
-        if (openRouterKey && openRouterKey.startsWith("sk-or-")) {
-            console.log("Initializing LlamaIndex with OpenRouter");
+        // More flexible key check: if it exists and isn't a placeholder
+        const isValidKey = (key: string | undefined) => 
+            key && key.length > 10 && !key.includes('your-');
+
+        if (isValidKey(openRouterKey)) {
+            console.log("Initializing AI service with OpenRouter");
             this.llm = new OpenAI({
                 apiKey: openRouterKey,
                 model: "google/gemini-2.0-flash-001",
                 additionalChatOptions: {
                     // @ts-ignore
                     headers: {
-                        "HTTP-Referer": "http://localhost:3000",
-                        "X-Title": "MarketWatchWeb"
+                        "HTTP-Referer": "https://node65.cs.colman.ac.il",
+                        "X-Title": "MarketWatchWeb-Prod"
                     }
                 },
                 baseURL: "https://openrouter.ai/api/v1"
             });
-        } else if (geminiKey) {
-            console.log("Initializing LlamaIndex with Google Gemini");
+        } else if (isValidKey(geminiKey)) {
+            console.log("Initializing AI service with Google Gemini native");
             this.llm = new Gemini({
                 apiKey: geminiKey,
                 model: GEMINI_MODEL.GEMINI_2_0_FLASH
             });
         } else {
-            console.warn("No AI API keys found. Please set OPENROUTER_API_KEY or GEMINI_API_KEY in .env");
+            console.warn("No valid AI API keys found. AI features will use fallbacks.");
         }
 
         if (this.llm) {
