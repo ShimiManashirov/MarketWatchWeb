@@ -8,6 +8,7 @@
     "build": "npm run build --prefix client && tsc",
     "start": "node dist/server.js",
     "test": "jest --detectOpenHandles --forceExit",
+    "seed": "ts-node src/seed.ts",
     "client:install": "npm install --prefix client",
     "test:watch": "jest --watch"
   },
