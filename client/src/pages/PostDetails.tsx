@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Container, Card, Image, Spinner, Button, Form, Dropdown } from 'react-bootstrap';
+import { Container, Card, Spinner, Button, Form, Dropdown } from 'react-bootstrap';
 import { getPostById, updatePost, deletePost, type Post } from '../services/postService';
 import { useAuth } from '../context/AuthContext';
 import { getImageUrl } from '../services/api';
 import CommentSection from '../components/CommentSection';
-import { ArrowLeft, User as UserIcon, MoreVertical, Edit2, Trash2, Check, X } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Edit2, Trash2, Check, X } from 'lucide-react';
+import Avatar from '../components/Avatar';
 
 const PostDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -98,19 +99,7 @@ const PostDetails = () => {
 
             <Card className="border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                 <Card.Header className="bg-white border-0 p-3 d-flex align-items-center gap-2">
-                    {post.owner?.image ? (
-                        <Image
-                            src={post.owner.image}
-                            roundedCircle
-                            width={40}
-                            height={40}
-                            style={{ objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '40px', height: '40px' }}>
-                            <UserIcon size={24} className="text-muted" />
-                        </div>
-                    )}
+                    <Avatar src={post.owner?.image} username={post.owner?.username} size={40} />
                     <div className="d-flex flex-column flex-grow-1">
                         <span className="fw-bold text-dark">{post.owner?.username || 'Unknown User'}</span>
                         <span className="text-muted small">{new Date(post.createdAt).toLocaleDateString()}</span>
