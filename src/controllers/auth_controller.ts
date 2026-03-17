@@ -27,7 +27,8 @@ const register = async (req: Request, res: Response) => {
         if (exists) return res.status(400).send("User already exists");
 
 
-        const salt = await bcrypt.genSalt(10);
+        const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10');
+        const salt = await bcrypt.genSalt(saltRounds);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const user = new User({ email, password: hashedPassword, username });
