@@ -27,8 +27,20 @@ jobs:
         echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
         echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
 
+    - name: Use Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
 
-    - name: Build and Restart with Docker Compose
+    - name: Install Dependencies and Run Tests on Host
+      run: |
+        npm install
+        docker compose up -d mongodb
+        sleep 15
+        MONGO_URI=mongodb://admin:market_watch_pass@127.0.0.1:27017/test_db?authSource=admin BCRYPT_SALT_ROUNDS=1 npm test
+        docker compose stop mongodb
+
+    - name: Build and Restart App Container
       run: |
         docker compose down
         docker compose up --build -d

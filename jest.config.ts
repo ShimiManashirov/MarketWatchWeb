@@ -2,7 +2,7 @@
 export default {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    testTimeout: 10000,
+    testTimeout: 60000,
     testMatch: ['**/**/*.test.ts'],
     verbose: true,
     forceExit: true,
