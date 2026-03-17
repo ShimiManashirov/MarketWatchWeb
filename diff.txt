@@ -1,0 +1,31 @@
+﻿diff --git a/client/src/pages/UserProfile.tsx b/client/src/pages/UserProfile.tsx
+index 622010d..5b97ffa 100644
+--- a/client/src/pages/UserProfile.tsx
++++ b/client/src/pages/UserProfile.tsx
+@@ -89,7 +89,12 @@ const UserProfile = () => {
+                             )}
+                             <div className="text-center text-md-start">
+                                 <h2 className="fw-bold mb-0">{profileUser?.username}</h2>
+-                                <p className="text-muted">{profileUser?.email}</p>
++                                {profileUser?.email && (
++                                    <p className="text-muted mb-0">{profileUser.email}</p>
++                                )}
++                                {profileUser?.createdAt && !isOwnProfile && (
++                                    <p className="text-muted small mb-0">Member since {new Date(profileUser.createdAt).toLocaleDateString()}</p>
++                                )}
+                             </div>
+                         </div>
+                         {isOwnProfile && (
+diff --git a/src/controllers/user_controller.ts b/src/controllers/user_controller.ts
+index ea6449d..4c8ef53 100644
+--- a/src/controllers/user_controller.ts
++++ b/src/controllers/user_controller.ts
+@@ -42,7 +42,7 @@ const updateProfile = async (req: Request, res: Response) => {
+ 
+ const getProfileById = async (req: Request, res: Response) => {
+     try {
+-        const user = await User.findById(req.params.id).select('-refreshTokens');
++        const user = await User.findById(req.params.id).select('username image createdAt');
+         if (!user) return res.status(404).json({ message: "User not found" });
+         res.status(200).json(user);
+     } catch (err) {

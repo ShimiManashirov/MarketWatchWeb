@@ -125,9 +125,9 @@ ${context ? `Context: ${JSON.stringify(context)}` : ''}
 
 Analyze the query and provide a JSON response with:
 1. "analysis": A brief, helpful description of the user's intent (1-2 sentences).
-2. "keywords": Array of 5-8 relevant search keywords for database matching (lowercase). Avoid generic words like "search" or "user".
+2. "keywords": Array of 5-8 relevant search keywords for database matching (lowercase). If the query looks like a name (e.g., "Shimi", "John"), include it as a keyword.
 3. "suggestions": 3-5 suggested follow-up searches.
-4. "intent": Content types to search. Valid values: ["posts", "users", "comments"].
+4. "intent": Content types to search. Valid values: ["posts", "users", "comments"]. If the query refers to a person or name, prioritize "users".
 
 Respond ONLY with valid JSON.
 `;

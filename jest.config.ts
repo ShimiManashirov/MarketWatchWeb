@@ -8,4 +8,13 @@ export default {
     clearMocks: true,
     resetMocks: true,
     restoreMocks: true,
+    reporters: [
+        'default',
+        ['jest-html-reporter', {
+            pageTitle: 'MarketWatchWeb Test Report',
+            outputPath: './test-report.html',
+            includeFailureMsg: true,
+            includeConsoleLog: true
+        }]
+    ]
 };
