@@ -37,7 +37,12 @@ jobs:
         npm install
         docker compose up -d mongodb
         sleep 15
-        MONGO_URI=mongodb://admin:market_watch_pass@127.0.0.1:27017/test_db?authSource=admin BCRYPT_SALT_ROUNDS=1 npm test
+        MONGO_URI=mongodb://admin:market_watch_pass@127.0.0.1:27017/test_db?authSource=admin \
+        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+        OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }} \
+        JWT_SECRET=${{ secrets.JWT_SECRET }} \
+        REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }} \
+        BCRYPT_SALT_ROUNDS=1 npm test
         docker compose stop mongodb
 
     - name: Build and Restart App Container
