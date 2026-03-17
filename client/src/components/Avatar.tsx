@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image } from 'react-bootstrap';
 import { User } from 'lucide-react';
 import { getImageUrl } from '../services/api';
