@@ -17,7 +17,7 @@ jobs:
       
       - name: Generate Timestamp
         id: time
-        run: echo "NOW=$(date +'%d-%m-%y-%H-%M')" >> $GITHUB_ENV
+        run: echo "NOW=$(TZ='Asia/Jerusalem' date +'%d-%m-%y-%H-%M')" >> $GITHUB_ENV
       
       - name: Create or Update Pull Request
         uses: repo-sync/pull-request@v2
