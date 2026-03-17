@@ -74,7 +74,8 @@ body {
 
 /* Dropdown arrow override */
 .no-arrow::after,
-.after-none::after {
+.after-none::after,
+.dropdown-toggle-no-caret::after {
   display: none !important;
 }
 
