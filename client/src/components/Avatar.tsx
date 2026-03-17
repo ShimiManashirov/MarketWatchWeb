@@ -20,7 +20,12 @@ const Avatar = ({ src, username, size = 40, className = '', border = false }: Av
     }, [src]);
 
     // Reset error if src changes
-    const hasImage = src && src !== 'null' && src !== 'undefined' && src !== '' && !src.includes('undefined');
+    const hasImage = src && 
+        src !== 'null' && 
+        src !== 'undefined' && 
+        src !== '' && 
+        !src.includes('undefined') && 
+        !src.includes('null');
 
     if (hasImage && !error) {
         return (
@@ -40,8 +45,21 @@ const Avatar = ({ src, username, size = 40, className = '', border = false }: Av
         );
     }
 
-    // Fallback: Initials or Icon
+    // Fallback: Initials or Icon with premium dynamic colors
     const initials = username ? username[0].toUpperCase() : null;
+    
+    // Generate a consistent color based on username
+    const colors = [
+        { bg: 'rgba(13, 110, 253, 0.1)', text: '#0d6efd' }, // Blue
+        { bg: 'rgba(102, 16, 242, 0.1)', text: '#6610f2' }, // Indigo
+        { bg: 'rgba(111, 66, 193, 0.1)', text: '#6f42c1' }, // Purple
+        { bg: 'rgba(214, 51, 132, 0.1)', text: '#d63384' }, // Pink
+        { bg: 'rgba(253, 126, 20, 0.1)', text: '#fd7e14' }, // Orange
+        { bg: 'rgba(25, 135, 84, 0.1)', text: '#198754' }   // Green
+    ];
+    
+    const colorIndex = username ? username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length : 0;
+    const selectedColor = colors[colorIndex];
 
     return (
         <div 
@@ -49,15 +67,13 @@ const Avatar = ({ src, username, size = 40, className = '', border = false }: Av
             style={{ 
                 width: `${size}px`, 
                 height: `${size}px`, 
-                backgroundColor: initials ? 'rgba(13, 110, 253, 0.1)' : '#f8f9fa',
-                color: initials ? '#0d6efd' : '#6c757d'
+                backgroundColor: initials ? selectedColor.bg : '#f2f2f2',
+                color: initials ? selectedColor.text : '#6c757d',
+                fontSize: `${size * 0.4}px`,
+                fontWeight: 600
             }}
         >
-            {initials ? (
-                <span className="fw-bold" style={{ fontSize: `${size * 0.4}px` }}>{initials}</span>
-            ) : (
-                <User size={size * 0.6} />
-            )}
+            {initials ? initials : <User size={size * 0.6} />}
         </div>
     );
 };
