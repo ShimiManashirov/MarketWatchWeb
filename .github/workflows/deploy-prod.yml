@@ -33,3 +33,5 @@ jobs:
         docker compose down
         docker compose up --build -d
         docker system prune -f
+        sleep 10 # Wait for container to fully start
+        docker exec market_watch_app sh -c "BCRYPT_SALT_ROUNDS=1 npm test"
