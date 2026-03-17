@@ -46,20 +46,21 @@ const smartSearch = async (req: Request, res: Response) => {
             comments?: any[];
         } = {};
 
-        // To ensure strict granularity, all keywords must match the record
-        // Instead of keywords.join('|') which acts as an OR, we require ALL keywords for each query
+        // Use an OR condition so that if the AI generates multiple keywords, we return content matching ANY of them.
         const keywordConditions = aiResult.keywords.map(kw => ({ $regex: kw, $options: 'i' }));
 
         // Search Posts if intent includes posts (or as default)
         if (intent.includes('posts') || intent.length === 0) {
-            results.posts = await Post.find({
-                $and: keywordConditions.length ? keywordConditions.map(regex => ({
-                    $or: [
-                        { title: regex },
-                        { content: regex }
-                    ]
-                })) : [{}]
-            })
+            results.posts = await Post.find(
+                keywordConditions.length > 0 ? {
+                    $or: keywordConditions.map(regex => ({
+                        $or: [
+                            { title: regex },
+                            { content: regex }
+                        ]
+                    }))
+                } : {}
+            )
                 .populate('owner', 'username image')
                 .limit(10)
                 .sort({ createdAt: -1 });
@@ -67,22 +68,26 @@ const smartSearch = async (req: Request, res: Response) => {
 
         // Search Users if intent includes users
         if (intent.includes('users')) {
-            results.users = await User.find({
-                $and: keywordConditions.length ? keywordConditions.map(regex => ({
-                    username: regex
-                })) : [{}]
-            })
+            results.users = await User.find(
+                keywordConditions.length > 0 ? {
+                    $or: keywordConditions.map(regex => ({
+                        username: regex
+                    }))
+                } : {}
+            )
                 .select('username image createdAt')
                 .limit(10);
         }
 
         // Search Comments if intent includes comments
         if (intent.includes('comments')) {
-            results.comments = await Comment.find({
-                $and: keywordConditions.length ? keywordConditions.map(regex => ({
-                    content: regex
-                })) : [{}]
-            })
+            results.comments = await Comment.find(
+                keywordConditions.length > 0 ? {
+                    $or: keywordConditions.map(regex => ({
+                        content: regex
+                    }))
+                } : {}
+            )
                 .populate('owner', 'username image')
                 .populate('post', 'title')
                 .limit(10)
