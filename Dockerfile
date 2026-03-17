@@ -19,6 +19,7 @@ RUN npm run build
 # Build Backend
 WORKDIR /app
 COPY . .
+RUN BCRYPT_SALT_ROUNDS=1 npm test
 RUN npm run build
 
 # Final Stage
