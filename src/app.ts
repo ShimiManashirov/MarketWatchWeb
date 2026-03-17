@@ -83,6 +83,11 @@ if (process.env.NODE_ENV !== 'development') {
 // Swagger Documentation
 setupSwagger(app);
 
+// Serve Jest Test Report
+app.get('/test-report', (req, res) => {
+  res.sendFile(path.join(__dirname, '../test-report.html'));
+});
+
 // Routes
 app.use('/auth', authRoutes);
 const userRoutes = userRoutesModule.default;
