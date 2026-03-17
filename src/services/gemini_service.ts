@@ -55,8 +55,28 @@ class GeminiService {
                 messages: [{ role: "user", content: prompt }]
             });
             return response.message.content.toString();
-        } catch (error) {
-            console.error('Error calling AI through LlamaIndex:', error);
+        } catch (error: any) {
+            console.error('Error calling AI through LlamaIndex:', error.message || error);
+            
+            // If the primary key (like OpenRouter) is unauthorized, attempt a fallback to Gemini
+            if (error.status === 401 && this.llm instanceof OpenAI) {
+                const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+                if (geminiKey) {
+                    console.log("Primary API key failed (401). Falling back to Google Gemini.");
+                    this.llm = new Gemini({
+                        apiKey: geminiKey,
+                        model: GEMINI_MODEL.GEMINI_2_0_FLASH
+                    });
+                    Settings.llm = this.llm;
+                    
+                    // Retry once with the new LLM
+                    const retryResponse = await this.llm.chat({
+                        messages: [{ role: "user", content: prompt }]
+                    });
+                    return retryResponse.message.content.toString();
+                }
+            }
+
             throw error;
         }
     }

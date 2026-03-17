@@ -58,6 +58,28 @@ app.use(passport.initialize());
 // Static folder for uploaded files (Images)
 app.use('/uploads', express.static('src/uploads'));
 
+import path from 'path';
+
+// Serve frontend static files BEFORE API routes to prevent overlapping paths (like /watchlist)
+// from hitting the backend API instead of the React app on direct browser navigation.
+if (process.env.NODE_ENV !== 'development') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+
+  // SPA Fallback: intercept HTML requests before backend routes catch them
+  app.use((req, res, next) => {
+    // Check if it's a browser navigation asking for HTML
+    const wantsHtml = req.method === 'GET' && req.headers.accept?.includes('text/html');
+    // Exclude /auth/google because the browser navigates to it to trigger OAuth
+    const isGoogleAuth = req.url.startsWith('/auth/google');
+    
+    if (wantsHtml && !isGoogleAuth) {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    } else {
+      next();
+    }
+  });
+}
+
 // Swagger Documentation
 setupSwagger(app);
 
@@ -79,27 +101,6 @@ app.use('/watchlist', watchlistRoutes);
 import cronService from './services/cron_service';
 if (process.env.NODE_ENV !== 'test') {
   cronService.initCronJobs();
-}
-
-import path from 'path';
-
-// Serving the frontend is handled below in the production check
-
-// Serve frontend static files
-if (process.env.NODE_ENV !== 'development') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-
-  // SPA Fallback: generic middleware to avoid Express 5 path restrictions
-  app.use((req, res, next) => {
-    // Only handle GET requests that are not for API routes and accept HTML
-    // Note: Backend auth routes (/auth/login, /auth/google, etc.) are registered before this middleware,
-    // so they are handled first. Only unmatched routes reach here for SPA fallback.
-    if (req.method === 'GET' && !req.url.startsWith('/api') && req.accepts('html')) {
-      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-    } else {
-      next();
-    }
-  });
 }
 
 // DB Connection
