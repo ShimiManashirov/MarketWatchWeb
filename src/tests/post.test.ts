@@ -10,7 +10,7 @@ beforeAll(async () => {
     if (mongoose.connection.readyState === 0) {
         await mongoose.connect(TEST_DB_URI);
     }
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();
