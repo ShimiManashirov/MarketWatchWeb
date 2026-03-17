@@ -1,9 +1,8 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Card, Button, Form, Image, Spinner, Dropdown } from 'react-bootstrap';
+import { Card, Button, Form, Spinner, Dropdown } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { getComments, createComment, deleteComment, updateComment, type Comment } from '../services/commentService';
 import { Send, MoreVertical, Trash2, Edit2, X, Check } from 'lucide-react';
-import { getImageUrl } from '../services/api';
 import Avatar from './Avatar';
 
 interface CommentSectionProps {

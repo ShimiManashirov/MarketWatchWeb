@@ -1,6 +1,6 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { Container, Navbar, Nav, Dropdown } from 'react-bootstrap';
 import { Bell, Home, LogOut, PlusCircle, Search, TrendingUp } from 'lucide-react';
 
 import Avatar from './Avatar';
