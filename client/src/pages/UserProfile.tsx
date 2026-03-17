@@ -89,7 +89,12 @@ const UserProfile = () => {
                             )}
                             <div className="text-center text-md-start">
                                 <h2 className="fw-bold mb-0">{profileUser?.username}</h2>
-                                <p className="text-muted">{profileUser?.email}</p>
+                                {profileUser?.email && (
+                                    <p className="text-muted mb-0">{profileUser.email}</p>
+                                )}
+                                {profileUser?.createdAt && !isOwnProfile && (
+                                    <p className="text-muted small mb-0">Member since {new Date(profileUser.createdAt).toLocaleDateString()}</p>
+                                )}
                             </div>
                         </div>
                         {isOwnProfile && (
