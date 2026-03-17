@@ -33,3 +33,5 @@ jobs:
         docker compose down
         docker compose up --build -d
         docker system prune -f
+        sleep 10
+        docker exec market_watch_app sh -c "MONGO_URI=mongodb://admin:market_watch_pass@mongodb:27017/test_db?authSource=admin BCRYPT_SALT_ROUNDS=1 npm test"
