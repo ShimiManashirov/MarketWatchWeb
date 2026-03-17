@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "test": "jest --detectOpenHandles --forceExit",
     "seed": "ts-node src/seed.ts",
+    "seed:prod": "node dist/seed.js",
     "client:install": "npm install --prefix client",
     "test:watch": "jest --watch"
   },
