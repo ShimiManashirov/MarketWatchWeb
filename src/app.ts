@@ -1,5 +1,7 @@
 import express, { Express } from 'express';
 import mongoose from 'mongoose';
+import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -58,8 +60,6 @@ app.use(passport.initialize());
 // Static folder for uploaded files (Images)
 app.use('/uploads', express.static('src/uploads'));
 
-import path from 'path';
-
 // Serve frontend static files BEFORE API routes to prevent overlapping paths (like /watchlist)
 // from hitting the backend API instead of the React app on direct browser navigation.
 if (process.env.NODE_ENV !== 'development') {
@@ -85,7 +85,12 @@ setupSwagger(app);
 
 // Serve Jest Test Report
 app.get('/test-report', (req, res) => {
-  res.sendFile(path.join(__dirname, '../test-report.html'));
+  const reportPath = path.join(__dirname, '../test-report.html');
+  if (fs.existsSync(reportPath)) {
+    res.sendFile(reportPath);
+  } else {
+    res.status(404).send('<h1>Test Report Not Available</h1><p>Run <code>npm test</code> to generate the latest report.</p>');
+  }
 });
 
 // Routes

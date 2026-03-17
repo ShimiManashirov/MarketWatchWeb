@@ -134,31 +134,32 @@ Respond ONLY with valid JSON.
 
             const text = await this.callAI(prompt);
 
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                const parsed = JSON.parse(jsonMatch[0]);
+            try {
+                const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const analysis = JSON.parse(jsonStr);
+                
                 return {
-                    analysis: parsed.analysis || '',
-                    keywords: parsed.keywords || this.extractKeywords(query),
-                    suggestions: parsed.suggestions || [],
-                    intent: parsed.intent || ['posts']
+                    analysis: analysis.analysis || "Search analysis complete.",
+                    keywords: analysis.keywords || this.extractKeywords(query),
+                    suggestions: analysis.suggestions || [],
+                    intent: analysis.intent || (query.toLowerCase().includes('user') ? ["users"] : ["posts"])
+                };
+            } catch (parseError) {
+                console.error("AI Response Parsing Error:", parseError, "Raw Text:", text);
+                return {
+                    analysis: "Search results based on your query.",
+                    keywords: this.extractKeywords(query),
+                    suggestions: ["Try searching for specific stocks", "Look for recent market news"],
+                    intent: query.toLowerCase().includes('user') ? ["users"] : ["posts", "comments"]
                 };
             }
-
-            return {
-                analysis: text,
-                keywords: this.extractKeywords(query),
-                suggestions: [],
-                intent: ['posts', 'users', 'comments']
-            };
         } catch (error: any) {
             console.error('Error in smart search:', error);
-            // Fallback to basic keyword matching if LLM fails
             return {
-                analysis: "Basic keyword search (AI currently unavailable)",
+                analysis: "Search results (AI currently unavailable).",
                 keywords: this.extractKeywords(query),
-                suggestions: [],
-                intent: ['posts', 'users', 'comments']
+                suggestions: ["Try searching for specific stocks", "Look for recent market news"],
+                intent: query.toLowerCase().includes('user') ? ["users"] : ["posts", "comments"]
             };
         }
     }
