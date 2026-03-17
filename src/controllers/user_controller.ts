@@ -42,7 +42,7 @@ const updateProfile = async (req: Request, res: Response) => {
 
 const getProfileById = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.params.id).select('-refreshTokens');
+        const user = await User.findById(req.params.id).select('username image createdAt');
         if (!user) return res.status(404).json({ message: "User not found" });
         res.status(200).json(user);
     } catch (err) {
