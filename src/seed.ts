@@ -8,6 +8,13 @@ import bcrypt from 'bcryptjs';
 dotenv.config();
 
 const seedDatabase = async () => {
+    // Safety Guard: Require a specific environment variable to confirm data wipe
+    if (process.env.ALLOW_SEED_WIPE !== 'true') {
+        console.error('❌ SEEDING ABORTED: "ALLOW_SEED_WIPE=true" environment variable is not set.');
+        console.log('To run this script, use: ALLOW_SEED_WIPE=true npm run seed (or seed:prod)');
+        process.exit(1);
+    }
+
     try {
         const mongoUrl = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_db';
         await mongoose.connect(mongoUrl);
