@@ -5,39 +5,41 @@ import User, { IUser } from '../models/user_model';
 import mongoose from 'mongoose';
 
 export const setupPassport = (): void => {
-    // Google OAuth Strategy
-    passport.use(
-        new GoogleStrategy(
-            {
-                clientID: process.env.GOOGLE_CLIENT_ID || '',
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-                callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback'
-            },
-            async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
-                try {
-                    // Check if user already exists
-                    let user = await User.findOne({ email: profile.emails?.[0].value });
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+        // Google OAuth Strategy
+        passport.use(
+            new GoogleStrategy(
+                {
+                    clientID: process.env.GOOGLE_CLIENT_ID,
+                    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                    callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback'
+                },
+                async (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) => {
+                    try {
+                        // Check if user already exists
+                        let user = await User.findOne({ email: profile.emails?.[0].value });
 
-                    if (user) {
-                        // User exists, return it
-                        return done(null, user as any);
+                        if (user) {
+                            // User exists, return it
+                            return done(null, user as any);
+                        }
+
+                        // Create new user
+                        user = await User.create({
+                            email: profile.emails?.[0].value,
+                            username: profile.displayName || profile.emails?.[0].value.split('@')[0],
+                            password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // Random password for OAuth users
+                            image: profile.photos?.[0].value || ''
+                        });
+
+                        done(null, user as any);
+                    } catch (error) {
+                        done(error as Error, undefined);
                     }
-
-                    // Create new user
-                    user = await User.create({
-                        email: profile.emails?.[0].value,
-                        username: profile.displayName || profile.emails?.[0].value.split('@')[0],
-                        password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // Random password for OAuth users
-                        image: profile.photos?.[0].value || ''
-                    });
-
-                    done(null, user as any);
-                } catch (error) {
-                    done(error as Error, undefined);
                 }
-            }
-        )
-    );
+            )
+        );
+    }
 
     /*
     // Facebook OAuth Strategy
