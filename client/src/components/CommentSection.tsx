@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getComments, createComment, deleteComment, updateComment, type Comment } from '../services/commentService';
 import { Send, MoreVertical, Trash2, Edit2, X, Check } from 'lucide-react';
 import { getImageUrl } from '../services/api';
+import Avatar from './Avatar';
 
 interface CommentSectionProps {
     postId: string;
@@ -104,20 +105,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
             <Card className="border-0 shadow-sm mb-4 rounded-4">
                 <Card.Body className="p-3">
                     <Form onSubmit={handleSubmit} className="d-flex gap-2">
-                        {user?.image ? (
-                            <Image
-                                src={getImageUrl(user.image)}
-                                roundedCircle
-                                width={32}
-                                height={32}
-                                className="border flex-shrink-0"
-                                style={{ objectFit: 'cover' }}
-                            />
-                        ) : (
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border flex-shrink-0" style={{ width: '32px', height: '32px' }}>
-                                <span className="text-muted small">{user?.username?.[0] || 'U'}</span>
-                            </div>
-                        )}
+                        <Avatar src={user?.image} username={user?.username} size={32} border />
                         <Form.Control
                             type="text"
                             placeholder="Write a comment..."
@@ -149,20 +137,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
                 <div className="d-flex flex-column gap-3">
                     {comments.map(comment => (
                         <div key={comment._id} className="d-flex gap-2">
-                            {comment.owner?.image ? (
-                                <Image
-                                    src={getImageUrl(comment.owner.image)}
-                                    roundedCircle
-                                    width={32}
-                                    height={32}
-                                    className="border flex-shrink-0 mt-1"
-                                    style={{ objectFit: 'cover' }}
-                                />
-                            ) : (
-                                <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center border flex-shrink-0 mt-1" style={{ width: '32px', height: '32px' }}>
-                                    <span className="text-primary fw-bold small">{comment.owner?.username?.[0]?.toUpperCase() || 'U'}</span>
-                                </div>
-                            )}
+                            <Avatar src={comment.owner?.image} username={comment.owner?.username} size={32} className="mt-1" border />
                             <div className="flex-grow-1">
                                 <div className="bg-white p-3 rounded-4 shadow-sm position-relative group">
                                     <div className="d-flex justify-content-between align-items-start mb-1">

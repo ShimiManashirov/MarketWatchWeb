@@ -1,38 +1,9 @@
-import { useState } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Container, Navbar, Nav, Dropdown, Image } from 'react-bootstrap';
-import { LogOut, Search, PlusCircle, Home, TrendingUp, User, Bell } from 'lucide-react';
-import { getImageUrl } from '../services/api';
+import { Navbar, Nav, Dropdown } from 'react-bootstrap';
+import { Bell, Home, LogOut, PlusCircle, Search, TrendingUp } from 'lucide-react';
 
-const ProfileAvatar = ({ user }: { user: any }) => {
-    const [imageError, setImageError] = useState(false);
-    
-    // Check if the image string is valid
-    const hasValidImageStr = user?.image && user.image !== 'null' && user.image !== 'undefined';
-    
-    if (hasValidImageStr && !imageError) {
-        return (
-            <Image
-                src={getImageUrl(user.image)}
-                roundedCircle
-                width={40}
-                height={40}
-                className="border"
-                style={{ objectFit: 'cover' }}
-                referrerPolicy="no-referrer"
-                onError={() => setImageError(true)}
-            />
-        );
-    }
-    
-    // Fallback UI
-    return (
-        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{ width: '40px', height: '40px' }}>
-            <User size={24} className="text-muted" />
-        </div>
-    );
-};
+import Avatar from './Avatar';
 
 const Layout = () => {
     const { user, logout } = useAuth();
@@ -85,18 +56,18 @@ const Layout = () => {
                                 </Link>
                             </Nav>
                         )}
-                        <Nav className="d-flex flex-row align-items-center justify-content-center gap-3 mt-3 mt-lg-0">
+                        <Nav className="d-flex flex-row align-items-center justify-content-center flex-nowrap gap-3 mt-3 mt-lg-0">
                             <Link
                                 to="/create-post"
                                 className="btn btn-light d-flex align-items-center justify-content-center p-2 rounded-circle border-0"
-                                style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.2)' }}
+                                style={{ width: '40px', height: '40px' }}
                             >
                                 <PlusCircle size={20} className="text-dark" />
                             </Link>
 
                             <Dropdown align="end">
                                 <Dropdown.Toggle variant="transparent" className="p-0 border-0 no-arrow after-none">
-                                    <ProfileAvatar user={user} />
+                                    <Avatar src={user?.image} username={user?.username} size={40} border />
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu className="shadow border-0 rounded-4 mt-2 p-2">

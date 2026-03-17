@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Image } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { type Post, likePost, unlikePost } from '../services/postService';
 import { getImageUrl } from '../services/api';
@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 interface PostCardProps {
     post: Post;
 }
+
+import Avatar from './Avatar';
 
 const PostCard = ({ post }: PostCardProps) => {
     const { user } = useAuth();
@@ -53,19 +55,7 @@ const PostCard = ({ post }: PostCardProps) => {
     return (
         <Card className="border-0 shadow-sm mb-4 rounded-4 overflow-hidden hover-shadow transition-all">
             <Card.Header className="bg-white border-0 p-3 d-flex align-items-center gap-2" style={{ cursor: 'pointer' }} onClick={openPost}>
-                {post.owner?.image ? (
-                    <Image
-                        src={getImageUrl(post.owner.image)}
-                        roundedCircle
-                        width={40}
-                        height={40}
-                        style={{ objectFit: 'cover' }}
-                    />
-                ) : (
-                    <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                        <span className="text-primary fw-bold">{post.owner?.username?.[0]?.toUpperCase() || 'U'}</span>
-                    </div>
-                )}
+                <Avatar src={post.owner?.image} username={post.owner?.username} size={40} />
                 <div className="d-flex flex-column">
                     <span className="fw-bold text-dark">{post.owner?.username || 'Unknown User'}</span>
                     <span className="text-muted small">{new Date(post.createdAt).toLocaleDateString()}</span>
