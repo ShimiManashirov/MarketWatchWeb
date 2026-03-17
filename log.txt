@@ -1,0 +1,37 @@
+﻿283aa41 Secure public user profiles by omitting emails and refresh tokens from external API calls
+ccdd853 Fix AI smart search strictness bug by using OR instead of AND (#43)
+b44ef8c Fix image persistency by adding app_uploads Docker volume (#41)
+0acf93f Fix SPA fallback ordering and AI provider fallback on 401 (#39)
+b36d77e Fix profile image fallback, fix Layout syntax, add DD-MM-YY-HH-mm to PR title (#37)
+62aed63 Fix Google OAuth login loop: JWT secret mismatch + AuthContext race condition (#35)
+97b9b1f Feature/UI and auth fixes (#33)
+c55eaab Fix/tests loop (#30)
+61cf6bc only PRs to main would trigger the CI (#29)
+9030e5d Fix/automated production deployment (#27)
+87d1a1a Fix/automated production deployment (#25)
+c7daab4 Fix/automated production deployment (#24)
+cda59c7 Feature/automated production deployment (#23)
+d020357 Update deployment workflow to support GitHub Secrets and Variables division (#22)
+35179c7 Merge pull request #21 from ShimiManashirov/fix/docker-compose
+ea491dd Production readiness & CI/CD deployment setup
+c98335d Merge pull request #20 from ShimiManashirov/production
+f08f7b1  created CICD and branch production
+0f54b41 Implement Google OAuth, Alert UI improvements, AI search (#19)
+40df30f feat: add interactive stock graph and fix AI search quota (#18)
+b0d759b feat: Implement core stock market functionalities and social posting features with full-stack setup. (#17)
+65fb986 Deployment prep (#16)
+7109f82 feat: Implement AI-powered smart search functionality, including a new UI page, dedicated service, and routing. (#15)
+c319f84 feat: Implement user profile page to display user details and their posts, and add its route. (#14)
+ee4261a feat: introduce post and comment features with dedicated services, routing, and interactive UI components. (#13)
+e9f8f57 feat: Implement initial client-side core features including authentication, user profile management, and post creation/display. (#12)
+6b05527 feat: auth system with login, register, oauth, and jwt handling (#11)
+a71d497 feat: initialize react client with vite, ts, and folder structure (#10)
+ec224f2 Delete POST_API.md (#9)
+dded533 Delete .DS_Store (#8)
+3bf94bb Delete COMMENT_API.md (#7)
+669cd50 Delete dist directory (#6)
+e9b2d80 Ai (#5)
+50c183d Post model (#4)
+cf0c3f7 User model (#2)
+41306ad first init (#1)
+7ec862d first commit
