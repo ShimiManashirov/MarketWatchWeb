@@ -14,21 +14,29 @@ interface AvatarProps {
 const Avatar = ({ src, username, size = 40, className = '', border = false }: AvatarProps) => {
     const [error, setError] = useState(false);
 
-    // Check if the image string is actually useful
-    const hasImage = src && src !== 'null' && src !== 'undefined' && src !== '';
+    // Reset error when source changes
+    useEffect(() => {
+        setError(false);
+    }, [src]);
+
+    // Reset error if src changes
+    const hasImage = src && src !== 'null' && src !== 'undefined' && src !== '' && !src.includes('undefined');
 
     if (hasImage && !error) {
         return (
-            <Image
-                src={getImageUrl(src)}
-                roundedCircle
-                width={size}
-                height={size}
-                className={`${className} ${border ? 'border' : ''}`}
-                style={{ objectFit: 'cover' }}
-                onError={() => setError(true)}
-                alt={username || 'User avatar'}
-            />
+            <div 
+                className={`rounded-circle overflow-hidden d-flex align-items-center justify-content-center ${className} ${border ? 'border' : ''}`}
+                style={{ width: `${size}px`, height: `${size}px` }}
+            >
+                <Image
+                    src={getImageUrl(src)}
+                    width={size}
+                    height={size}
+                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    onError={() => setError(true)}
+                    alt={username || 'User avatar'}
+                />
+            </div>
         );
     }
 
