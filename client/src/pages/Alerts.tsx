@@ -255,22 +255,22 @@ const Alerts = () => {
                                             <Button
                                                 variant="primary"
                                                 size="sm"
-                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm"
-                                                style={{ width: '40px', height: '40px', backgroundColor: '#0d6efd' }}
+                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm px-3 gap-2"
+                                                style={{ height: '40px', backgroundColor: '#0d6efd' }}
                                                 onClick={() => openEditModal(alert)}
-                                                title="Edit alert"
                                             >
-                                                <Edit2 size={20} className="text-white" />
+                                                <Edit2 size={18} className="text-white" />
+                                                <span className="text-white fw-medium">Edit</span>
                                             </Button>
                                             <Button
                                                 variant="danger"
                                                 size="sm"
-                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm"
-                                                style={{ width: '40px', height: '40px', backgroundColor: '#dc3545' }}
+                                                className="rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm px-3 gap-2"
+                                                style={{ height: '40px', backgroundColor: '#dc3545' }}
                                                 onClick={() => handleDeleteAlert(alert._id)}
-                                                title="Delete alert"
                                             >
-                                                <Trash2 size={20} className="text-white" />
+                                                <Trash2 size={18} className="text-white" />
+                                                <span className="text-white fw-medium">Delete</span>
                                             </Button>
                                         </div>
                                     </Card.Body>
@@ -303,11 +303,12 @@ const Alerts = () => {
                                         <Button
                                             variant="danger"
                                             size="sm"
-                                            className="rounded-3 d-flex align-items-center justify-content-center border-0"
-                                            style={{ width: '40px', height: '40px', opacity: 0.8 }}
+                                            className="rounded-3 d-flex align-items-center justify-content-center border-0 px-3 gap-2"
+                                            style={{ height: '40px', opacity: 0.8 }}
                                             onClick={() => handleDeleteAlert(alert._id)}
                                         >
-                                            <Trash2 size={20} className="text-white" />
+                                            <Trash2 size={18} className="text-white" />
+                                            <span className="text-white fw-medium">Delete</span>
                                         </Button>
                                     </Card.Body>
                                 </Card>
