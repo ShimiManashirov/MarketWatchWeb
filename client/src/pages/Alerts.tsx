@@ -260,7 +260,7 @@ const Alerts = () => {
                                                 onClick={() => openEditModal(alert)}
                                                 title="Edit alert"
                                             >
-                                                <Edit2 size={20} color="white" strokeWidth={2.5} />
+                                                <Edit2 size={20} className="text-white" />
                                             </Button>
                                             <Button
                                                 variant="danger"
@@ -270,7 +270,7 @@ const Alerts = () => {
                                                 onClick={() => handleDeleteAlert(alert._id)}
                                                 title="Delete alert"
                                             >
-                                                <Trash2 size={20} color="white" strokeWidth={2.5} />
+                                                <Trash2 size={20} className="text-white" />
                                             </Button>
                                         </div>
                                     </Card.Body>
@@ -307,7 +307,7 @@ const Alerts = () => {
                                             style={{ width: '40px', height: '40px', opacity: 0.8 }}
                                             onClick={() => handleDeleteAlert(alert._id)}
                                         >
-                                            <Trash2 size={20} color="white" strokeWidth={2.5} />
+                                            <Trash2 size={20} className="text-white" />
                                         </Button>
                                     </Card.Body>
                                 </Card>
