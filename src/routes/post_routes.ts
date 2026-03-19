@@ -191,4 +191,23 @@ router.delete('/:id/like', authMiddleware, postController.unlikePost);
  */
 router.delete('/:id', authMiddleware, postController.deletePost);
 
+/**
+ * @swagger
+ * /posts/search/semantic:
+ *   get:
+ *     summary: Search posts using AI semantic embeddings
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Natural language search query
+ *     responses:
+ *       200:
+ *         description: List of relevant posts ranked by similarity
+ */
+router.get('/search/semantic', postController.searchPostsSemantic);
+
 export default router;

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Post from '../models/post_model';
+import Post, { IPost } from '../models/post_model';
 import { AuthRequest } from '../middleware/auth_middleware';
+import GeminiService from '../services/gemini_service';
 
 const createPost = async (req: Request, res: Response) => {
     try {
@@ -25,8 +26,19 @@ const createPost = async (req: Request, res: Response) => {
         }
 
         const post = new Post(postData);
-        await post.save();
+        
+        // Generate embedding in background (don't block response if possible, or wait if needed for early consistency)
+        try {
+            const embeddingText = `${title} ${content}`;
+            const embedding = await GeminiService.generateEmbedding(embeddingText);
+            if (embedding.length > 0) {
+                post.embedding = embedding;
+            }
+        } catch (embedError) {
+            console.error("Failed to generate embedding for new post:", embedError);
+        }
 
+        await post.save();
         res.status(201).json(post);
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create post';
@@ -138,7 +150,7 @@ const updatePost = async (req: Request, res: Response) => {
         }
 
         const { title, content, imageUrl } = req.body;
-        const updateData: { title?: string; content?: string; image?: string } = {};
+        const updateData: { title?: string; content?: string; image?: string; embedding?: number[] } = {};
 
         if (title) updateData.title = title;
         if (content) updateData.content = content;
@@ -148,6 +160,21 @@ const updatePost = async (req: Request, res: Response) => {
             updateData.image = req.file.path;
         } else if (imageUrl) {
             updateData.image = imageUrl;
+        }
+
+        // If content changed, update embedding
+        if (title || content) {
+            try {
+                const finalTitle = title || post.title;
+                const finalContent = content || post.content;
+                const embeddingText = `${finalTitle} ${finalContent}`;
+                const embedding = await GeminiService.generateEmbedding(embeddingText);
+                if (embedding.length > 0) {
+                    updateData.embedding = embedding;
+                }
+            } catch (embedError) {
+                console.error("Failed to update embedding for post:", embedError);
+            }
         }
 
         const updatedPost = await Post.findByIdAndUpdate(
@@ -206,8 +233,7 @@ const likePost = async (req: Request, res: Response) => {
         await post.save();
 
         const updatedPost = await Post.findById(postId)
-            .populate('owner', 'username image')
-            .populate('likes', 'username');
+            .populate('owner', 'username image');
 
         res.status(200).json(updatedPost);
     } catch (err) {
@@ -236,12 +262,56 @@ const unlikePost = async (req: Request, res: Response) => {
         await post.save();
 
         const updatedPost = await Post.findById(postId)
-            .populate('owner', 'username image')
-            .populate('likes', 'username');
+            .populate('owner', 'username image');
 
         res.status(200).json(updatedPost);
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to unlike post';
+        res.status(400).json({ message });
+    }
+};
+
+const searchPostsSemantic = async (req: Request, res: Response) => {
+    try {
+        const query = req.query.q as string;
+        if (!query) {
+            return res.status(400).json({ message: "Search query is required" });
+        }
+
+        // 1. Generate embedding for the search query
+        const queryEmbedding = await GeminiService.generateEmbedding(query);
+        if (queryEmbedding.length === 0) {
+            // Fallback to text search if embedding fails
+            const posts = await Post.find({
+                $or: [
+                    { title: { $regex: query, $options: 'i' } },
+                    { content: { $regex: query, $options: 'i' } }
+                ]
+            }).populate('owner', 'username image').limit(10);
+            return res.status(200).json({ posts, method: 'keyword' });
+        }
+
+        // 2. Fetch posts that HAVE embeddings
+        // In a real production apps with millions of posts, you'd use MongoDB Atlas Vector Search ($vectorSearch).
+        // Here, we'll fetch the most recent posts and rank them by cosine similarity.
+        const candidatePosts = await Post.find({ 
+            embedding: { $exists: true, $ne: [] } 
+        }).populate('owner', 'username image').limit(100);
+
+        // 3. Rank by similarity
+        const rankedPosts = candidatePosts
+            .map(post => {
+                const similarity = GeminiService.cosineSimilarity(queryEmbedding, post.embedding);
+                return { post, similarity };
+            })
+            .sort((a, b) => b.similarity - a.similarity)
+            .filter(item => item.similarity > 0.6) // Threshold for relevance
+            .slice(0, 10)
+            .map(item => item.post);
+
+        res.status(200).json({ posts: rankedPosts, method: 'semantic' });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : 'Semantic search failed';
         res.status(400).json({ message });
     }
 };
@@ -254,5 +324,6 @@ export default {
     updatePost,
     deletePost,
     likePost,
-    unlikePost
+    unlikePost,
+    searchPostsSemantic
 };

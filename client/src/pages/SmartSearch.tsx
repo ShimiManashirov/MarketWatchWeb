@@ -1,16 +1,19 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Card, Row, Col, Spinner, Alert, Badge, Image } from 'react-bootstrap';
-import { Search, Sparkles, TrendingUp, Cpu, User, MessageCircle } from 'lucide-react';
-import { smartSearch, type AIAnalysisResponse, type SearchUser, type SearchComment } from '../services/aiService';
+import { Search, Sparkles, TrendingUp, Cpu, User, MessageCircle, BrainCircuit } from 'lucide-react';
+import { smartSearch, semanticSearch, type AIAnalysisResponse, type SearchUser, type SearchComment } from '../services/aiService';
 import { getImageUrl } from '../services/api';
 import PostCard from '../components/PostCard';
+import type { Post } from '../services/postService';
 
 const SmartSearch = () => {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [result, setResult] = useState<AIAnalysisResponse | null>(null);
+    const [semanticResult, setSemanticResult] = useState<Post[] | null>(null);
+    const [useDeepSearch, setUseDeepSearch] = useState(false);
     const navigate = useNavigate();
 
     const handleSearch = async (e: FormEvent) => {
@@ -20,10 +23,16 @@ const SmartSearch = () => {
         setLoading(true);
         setError('');
         setResult(null);
+        setSemanticResult(null);
 
         try {
-            const response = await smartSearch(query);
-            setResult(response.data);
+            if (useDeepSearch) {
+                const response = await semanticSearch(query);
+                setSemanticResult(response.data.posts);
+            } else {
+                const response = await smartSearch(query);
+                setResult(response.data);
+            }
         } catch (err: any) {
             const status = err.response?.status || '';
             const msg = err.response?.data?.message || 'Search is currently unavailable';
@@ -68,14 +77,34 @@ const SmartSearch = () => {
                             <Button
                                 type="submit"
                                 variant="primary"
-                                className="rounded-pill px-4 fw-medium my-1 me-1 hover-zoom"
+                                className={`rounded-pill px-4 fw-medium my-1 me-1 hover-zoom ${useDeepSearch ? 'bg-gradient-brand border-0' : ''}`}
                                 disabled={loading || !query.trim()}
                             >
-                                {loading ? <Spinner animation="border" size="sm" /> : 'Search'}
+                                {loading ? <Spinner animation="border" size="sm" /> : (
+                                    <div className="d-flex align-items-center gap-2">
+                                        {useDeepSearch && <BrainCircuit size={18} />}
+                                        {useDeepSearch ? 'Deep Search' : 'Search'}
+                                    </div>
+                                )}
                             </Button>
                         </Form>
                     </Card.Body>
                 </Card>
+                <div className="mt-3 text-center">
+                    <Form.Check
+                        type="switch"
+                        id="deep-search-switch"
+                        label={
+                            <span className={`small fw-bold ${useDeepSearch ? 'text-primary' : 'text-muted'}`}>
+                                <BrainCircuit size={14} className="me-1 mb-1" /> 
+                                Enable Deep Semantic Search
+                            </span>
+                        }
+                        checked={useDeepSearch}
+                        onChange={(e) => setUseDeepSearch(e.target.checked)}
+                        className="d-inline-block"
+                    />
+                </div>
             </div>
 
             {error && (
@@ -249,6 +278,32 @@ const SmartSearch = () => {
                     {result.resultCount === 0 && (
                         <div className="text-center py-5">
                             <p className="text-muted">No results found. Try a different search query.</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {semanticResult && (
+                <div className="animate-fade-in">
+                    <div className="d-flex align-items-center gap-3 mb-4 p-3 bg-primary bg-opacity-10 rounded-4">
+                        <BrainCircuit size={32} className="text-primary" />
+                        <div>
+                            <h4 className="fw-bold mb-0 text-primary">Semantic Insights</h4>
+                            <p className="text-muted small mb-0">Reranked results using neural embeddings for deeper meaning matching</p>
+                        </div>
+                    </div>
+                    
+                    <Row xs={1} md={2} lg={3} className="g-4">
+                        {semanticResult.map(post => (
+                            <Col key={post._id}>
+                                <PostCard post={post} />
+                            </Col>
+                        ))}
+                    </Row>
+
+                    {semanticResult.length === 0 && (
+                        <div className="text-center py-5">
+                            <p className="text-muted">Deep search couldn't find matches. Try a broader topic.</p>
                         </div>
                     )}
                 </div>

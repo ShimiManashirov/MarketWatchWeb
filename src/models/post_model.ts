@@ -6,6 +6,7 @@ export interface IPost extends Document {
     owner: mongoose.Types.ObjectId;
     image?: string;
     likes: mongoose.Types.ObjectId[];
+    embedding: number[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -21,6 +22,10 @@ const postSchema = new Schema<IPost>({
         type: String,
         required: true,
         trim: true
+    },
+    embedding: {
+        type: [Number],
+        default: []
     },
     owner: {
         type: Schema.Types.ObjectId,

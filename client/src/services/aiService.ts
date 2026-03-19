@@ -39,3 +39,6 @@ export const smartSearch = async (query: string) => {
 export const generateSuggestions = async (topic: string) => {
     return api.post<{ topic: string, suggestions: string[] }>('/ai/suggestions', { topic });
 };
+export const semanticSearch = async (query: string) => {
+    return api.get<{ posts: Post[], method: string }>('/posts/search/semantic', { params: { q: query } });
+};

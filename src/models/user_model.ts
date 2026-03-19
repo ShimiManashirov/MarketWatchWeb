@@ -6,6 +6,7 @@ export interface IUser extends Document {
     password?: string;
     image?: string;
     refreshTokens: string[];
+    embedding: number[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -22,6 +23,10 @@ const userSchema = new Schema<IUser>({
         unique: true,
         trim: true,
         lowercase: true
+    },
+    embedding: {
+        type: [Number],
+        default: []
     },
     password: {
         type: String,

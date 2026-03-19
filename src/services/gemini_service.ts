@@ -5,9 +5,11 @@ import {
 } from "llamaindex";
 import { OpenAI } from "@llamaindex/openai";
 import { Gemini, GEMINI_MODEL } from "@llamaindex/google";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 class GeminiService {
     private llm: any;
+    private genAI: GoogleGenerativeAI | null = null;
 
     constructor() {
         this.initializeAI();
@@ -41,6 +43,7 @@ class GeminiService {
                 apiKey: geminiKey,
                 model: GEMINI_MODEL.GEMINI_2_0_FLASH
             });
+            this.genAI = new GoogleGenerativeAI(geminiKey as string);
         } else {
             console.warn("No valid AI API keys found. AI features will use fallbacks.");
         }
@@ -232,6 +235,44 @@ Respond ONLY with valid JSON.
         return words
             .filter(word => word.length > 3 && !stopWords.includes(word))
             .slice(0, 10);
+    }
+
+    /**
+     * Generate an embedding for a piece of text
+     */
+    async generateEmbedding(text: string): Promise<number[]> {
+        if (!this.genAI) {
+            console.warn("GenAI not initialized. Returning empty embedding.");
+            return [];
+        }
+
+        try {
+            const model = this.genAI.getGenerativeModel({ model: "text-embedding-004" });
+            const result = await model.embedContent(text);
+            return result.embedding.values;
+        } catch (error) {
+            console.error('Error generating embedding:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Calculate cosine similarity between two vectors
+     */
+    cosineSimilarity(vecA: number[], vecB: number[]): number {
+        if (!vecA.length || !vecB.length || vecA.length !== vecB.length) return 0;
+        
+        let dotProduct = 0;
+        let normA = 0;
+        let normB = 0;
+        
+        for (let i = 0; i < vecA.length; i++) {
+            dotProduct += vecA[i] * vecB[i];
+            normA += vecA[i] * vecA[i];
+            normB += vecB[i] * vecB[i];
+        }
+        
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 }
 
