@@ -14,13 +14,21 @@ import { setupPassport } from './config/passport';
 
 
 
-dotenv.config();
+if (process.env.NODE_ENV !== 'test') {
+  dotenv.config();
+}
 
 const app: Express = express();
 
 // Security Middlewares
 app.use(helmet({
-  crossOriginResourcePolicy: false, // allow images to be served cross origin
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://images.unsplash.com", "https://api.dicebear.com", "https://*.unsplash.com"],
+    },
+  },
 }));
 
 // Rate limiting to prevent brute force / DDoS
@@ -60,6 +68,19 @@ app.use(passport.initialize());
 // Static folder for uploaded files (Images)
 app.use('/uploads', express.static('src/uploads'));
 
+// Swagger Documentation (Moved UP to avoid SPA fallback interception)
+setupSwagger(app);
+
+// Serve Jest Test Report (Moved UP to avoid SPA fallback interception)
+app.get('/test-report', (req, res) => {
+  const reportPath = path.join(__dirname, '../test-report.html');
+  if (fs.existsSync(reportPath)) {
+    res.sendFile(reportPath);
+  } else {
+    res.status(404).send('<h1>Test Report Not Available</h1><p>Run <code>npm test</code> to generate the latest report.</p>');
+  }
+});
+
 // Serve frontend static files BEFORE API routes to prevent overlapping paths (like /watchlist)
 // from hitting the backend API instead of the React app on direct browser navigation.
 if (process.env.NODE_ENV !== 'development') {
@@ -79,19 +100,6 @@ if (process.env.NODE_ENV !== 'development') {
     }
   });
 }
-
-// Swagger Documentation
-setupSwagger(app);
-
-// Serve Jest Test Report
-app.get('/test-report', (req, res) => {
-  const reportPath = path.join(__dirname, '../test-report.html');
-  if (fs.existsSync(reportPath)) {
-    res.sendFile(reportPath);
-  } else {
-    res.status(404).send('<h1>Test Report Not Available</h1><p>Run <code>npm test</code> to generate the latest report.</p>');
-  }
-});
 
 // Routes
 app.use('/auth', authRoutes);

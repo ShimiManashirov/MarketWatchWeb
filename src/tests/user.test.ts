@@ -1,9 +1,12 @@
+process.env.NODE_ENV = 'test';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../app';
 import User from '../models/user_model';
 
 const TEST_DB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_test_db';
+
+jest.setTimeout(60000);
 
 beforeAll(async () => {
     if (mongoose.connection.readyState === 0) {

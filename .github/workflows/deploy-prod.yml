@@ -6,13 +6,63 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  run-tests:
     runs-on: self-hosted
-    
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Environment
+      run: |
+        echo "PORT=${{ vars.PORT || 3000 }}" > .env
+        echo "NODE_ENV=test" >> .env
+        echo "MONGO_URI=mongodb://admin:market_watch_pass@127.0.0.1:27017/test_db?authSource=admin" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+        echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
+        echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" >> .env
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+        echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+        echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+
+    - name: Use Node.js 22
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Run Tests on Host
+      run: |
+        npm install
+        docker compose up -d mongodb
+        sleep 15
+        MONGO_URI=mongodb://admin:market_watch_pass@127.0.0.1:27017/test_db?authSource=admin \
+        GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+        OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }} \
+        JWT_SECRET=${{ secrets.JWT_SECRET }} \
+        REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }} \
+        NODE_OPTIONS=--experimental-vm-modules \
+        BCRYPT_SALT_ROUNDS=1 npm test
+        docker compose stop mongodb
+
+    - name: Upload Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: test-report.html
+        retention-days: 1
+
+  deploy-app:
+    needs: run-tests
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download Test Report
+      uses: actions/download-artifact@v4
+      with:
+        name: test-report
+        path: .
+
+    - name: Set up Production Environment
       run: |
         echo "PORT=${{ vars.PORT || 3000 }}" > .env
         echo "NODE_ENV=${{ vars.NODE_ENV || 'production' }}" >> .env
@@ -27,9 +77,8 @@ jobs:
         echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
         echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
 
-
-    - name: Build and Restart with Docker Compose
+    - name: Build and Restart App Container
       run: |
-        docker-compose down
-        docker-compose up --build -d
+        docker compose down
+        docker compose up --build -d
         docker system prune -f

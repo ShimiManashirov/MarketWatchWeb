@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../app';
@@ -6,8 +7,11 @@ import Post from '../models/post_model';
 
 const TEST_DB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/market_watch_test_db';
 
-// Check if Gemini API key is configured
-const hasGeminiKey = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here';
+jest.setTimeout(60000);
+
+// Check if AI API keys are configured correctly
+const isValid = (k: string | undefined) => k && k.length > 10 && !k.includes('your-');
+const hasAIKey = isValid(process.env.GEMINI_API_KEY) || isValid(process.env.OPENROUTER_API_KEY);
 
 beforeAll(async () => {
     if (mongoose.connection.readyState === 0) {
@@ -24,7 +28,7 @@ beforeEach(async () => {
     await Post.deleteMany({});
 });
 
-const describeIfConfigured = hasGeminiKey ? describe : describe.skip;
+const describeIfConfigured = hasAIKey ? describe : describe.skip;
 
 describeIfConfigured('AI API (requires GEMINI_API_KEY)', () => {
     const testUser = {

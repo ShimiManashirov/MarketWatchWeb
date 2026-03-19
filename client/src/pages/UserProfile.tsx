@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Image, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import { getPostsByOwner, type Post } from '../services/postService';
 import api, { getImageUrl } from '../services/api';
 import PostCard from '../components/PostCard';
-import { User as UserIcon, Edit2, Grid, List as ListIcon } from 'lucide-react';
+import { Edit2, Grid, List as ListIcon } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import Avatar from '../components/Avatar';
 
 const UserProfile = () => {
     const { id } = useParams<{ id: string }>();
@@ -73,20 +74,13 @@ const UserProfile = () => {
                 <Card.Body className="position-relative pt-0 px-4 pb-4">
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-end">
                         <div className="d-flex flex-column align-items-center align-items-md-start" style={{ marginTop: '-60px' }}>
-                            {profileUser?.image ? (
-                                <Image
-                                    src={getImageUrl(profileUser.image)}
-                                    roundedCircle
-                                    width={120}
-                                    height={120}
-                                    className="border border-4 border-white shadow-sm mb-3"
-                                    style={{ objectFit: 'cover', backgroundColor: '#fff' }}
-                                />
-                            ) : (
-                                <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border border-4 border-white shadow-sm mb-3" style={{ width: '120px', height: '120px', backgroundColor: '#fff' }}>
-                                    <UserIcon size={48} className="text-muted" />
-                                </div>
-                            )}
+                            <Avatar 
+                                src={profileUser?.image} 
+                                username={profileUser?.username} 
+                                size={120} 
+                                className="border border-4 border-white shadow-sm mb-3" 
+                                border 
+                            />
                             <div className="text-center text-md-start">
                                 <h2 className="fw-bold mb-0">{profileUser?.username}</h2>
                                 {profileUser?.email && (

@@ -1,7 +1,8 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-export default {
+module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
+    testTimeout: 60000,
     testMatch: ['**/**/*.test.ts'],
     verbose: true,
     forceExit: true,

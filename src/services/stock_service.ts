@@ -1,4 +1,5 @@
 import YahooFinance from 'yahoo-finance2';
+import mongoose from 'mongoose';
 import StockAlert, { IStockAlert } from '../models/stock_alert_model';
 import User from '../models/user_model';
 
@@ -37,8 +38,9 @@ const getHistoricalData = async (symbol: string, period1: string, period2: strin
 };
 
 const createAlert = async (userId: string, symbol: string, targetPrice: number, condition: 'ABOVE' | 'BELOW') => {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
     const alert = new StockAlert({
-        user: userId,
+        user: userObjectId,
         symbol,
         targetPrice,
         condition
@@ -47,14 +49,21 @@ const createAlert = async (userId: string, symbol: string, targetPrice: number, 
 };
 
 const getUserAlerts = async (userId: string) => {
-    return await StockAlert.find({ user: userId, isTriggered: false }).sort({ createdAt: -1 });
+    try {
+        // Mongoose automatically casts the string userId to an ObjectId
+        return await StockAlert.find({ user: userId }).sort({ createdAt: -1 });
+    } catch (err) {
+        console.error(`Error loading alerts for user ${userId}:`, err);
+        throw new Error('Failed to load alerts');
+    }
 };
 
 const deleteAlert = async (alertId: string, userId: string) => {
-    return await StockAlert.findOneAndDelete({ _id: alertId, user: userId });
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    return await StockAlert.findOneAndDelete({ _id: alertId, user: userObjectId });
 };
 
-// Check alerts logic (to be called by worker)
+// Check all active alerts against current market prices
 const checkAlerts = async () => {
     const activeAlerts = await StockAlert.find({ isTriggered: false });
     const symbols = [...new Set(activeAlerts.map(a => a.symbol))]; // Unique symbols
@@ -76,10 +85,8 @@ const checkAlerts = async () => {
                 }
 
                 if (triggered) {
-                    alert.isTriggered = true;
-                    await alert.save();
-                    // In a real app, send email/push notification here
-                    console.log(`ALERT TRIGGERED: ${symbol} is ${alert.condition} ${alert.targetPrice} (Current: ${currentPrice})`);
+                    await StockAlert.findByIdAndUpdate(alert._id, { isTriggered: true });
+                    console.log(`Alert triggered for ${symbol}: ${alert.condition} ${alert.targetPrice} (Price: ${currentPrice})`);
                 }
             }
         } catch (err) {
@@ -89,8 +96,9 @@ const checkAlerts = async () => {
 };
 
 const updateAlert = async (alertId: string, userId: string, data: { targetPrice?: number; condition?: 'ABOVE' | 'BELOW' }) => {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
     return await StockAlert.findOneAndUpdate(
-        { _id: alertId, user: userId },
+        { _id: alertId, user: userObjectId },
         { $set: data },
         { new: true }
     );

@@ -5,11 +5,14 @@ on:
     branches: [ "production" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   sync-to-main:
     runs-on: ubuntu-latest
     # ONLY run if the push to production did NOT come from main
-    # This avoids the "Main -> Prod -> Main" circular loop
     if: github.event.head_commit.author.name != 'github-actions' && !contains(github.event.head_commit.message, 'main')
     
     steps:
@@ -18,15 +21,25 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.PR_TOKEN || secrets.GITHUB_TOKEN }}
 
-      - name: Sync changes to main
+      - name: Create PR to sync production back to main
+        env:
+          GH_TOKEN: ${{ secrets.PR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch origin main production
           
-          git checkout main
-          git fetch origin production
+          # Check if there are differences
+          if git diff --quiet origin/main..origin/production; then
+            echo "No differences between production and main. Skipping."
+            exit 0
+          fi
           
-          # Use allow-unrelated-histories to bridge the gap between branches if they diverged
-          git merge origin/production --allow-unrelated-histories -m "🤖 Sync hotfix from production to main"
+          # Create a sync branch from production
+          git checkout -b sync/prod-to-main origin/production
           
-          git push origin main
+          # Create PR using GitHub CLI
+          gh pr create \
+            --base main \
+            --head sync/prod-to-main \
+            --title "🤖 Sync: Production hotfixes back to main" \
+            --body "Automated PR to sync hotfix changes from production back to main." \
+            || echo "PR already exists or nothing to sync."

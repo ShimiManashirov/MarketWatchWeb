@@ -156,11 +156,13 @@ router.put('/alerts/:id', authMiddleware, stockController.updateAlert);
  *       200:
  *         description: Alert deleted
  */
+router.delete('/alerts/:id', authMiddleware, stockController.deleteAlert);
+
 /**
  * @swagger
  * /stocks/check-alerts:
  *   post:
- *     summary: Manually trigger alert check (Dev/Verif purposes)
+ *     summary: Manually trigger alert check
  *     tags: [Stocks]
  *     security:
  *       - bearerAuth: []

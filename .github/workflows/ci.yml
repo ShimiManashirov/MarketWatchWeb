@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  test-and-build:
     runs-on: ubuntu-latest
 
     services:
@@ -30,7 +30,7 @@ jobs:
         npm ci --prefix client
 
     - name: Run tests
-      run: npm test
+      run: NODE_OPTIONS="--experimental-vm-modules" npm test
       env:
         MONGO_URI: mongodb://localhost:27017/test_db
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -41,6 +41,7 @@ jobs:
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        BCRYPT_SALT_ROUNDS: 1
 
     - name: Build (Backend & Frontend)
       run: npm run build
