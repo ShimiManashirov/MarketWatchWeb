@@ -55,4 +55,5 @@ PAGINATION_COMPLETE.md
 CLEANUP_SUMMARY.md
 
 # PDF documents (specs, mockups — local only)
-*.pdf
+# Test reports
+test-report.html
