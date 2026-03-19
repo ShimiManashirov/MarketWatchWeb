@@ -94,7 +94,9 @@ const options: swaggerJsdoc.Options = {
         path.join(__dirname, './dist/routes/*.js'),
         path.join(__dirname, './dist/controllers/*.js'),
         path.join(__dirname, '../dist/routes/*.js'),
-        path.join(__dirname, '../dist/controllers/*.js')
+        path.join(__dirname, '../dist/controllers/*.js'),
+        './src/routes/*.ts',
+        './src/controllers/*.ts'
     ]
 };
 
