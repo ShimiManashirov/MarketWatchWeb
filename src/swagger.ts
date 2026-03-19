@@ -1,6 +1,7 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
+import path from 'path';
 
 const options: swaggerJsdoc.Options = {
     definition: {
@@ -88,10 +89,14 @@ const options: swaggerJsdoc.Options = {
         ]
     },
     apis: [
+        path.join(__dirname, './routes/*.ts'),
+        path.join(__dirname, './controllers/*.ts'),
+        path.join(__dirname, './dist/routes/*.js'),
+        path.join(__dirname, './dist/controllers/*.js'),
+        path.join(__dirname, '../dist/routes/*.js'),
+        path.join(__dirname, '../dist/controllers/*.js'),
         './src/routes/*.ts',
-        './src/controllers/*.ts',
-        './dist/routes/*.js',
-        './dist/controllers/*.js'
+        './src/controllers/*.ts'
     ]
 };
 

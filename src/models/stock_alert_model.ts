@@ -39,7 +39,8 @@ const StockAlertSchema: Schema = new Schema({
     }
 });
 
-// Index for efficient querying by background worker
+// Efficient multi-field indexing for faster lookup by worker and user queries
+StockAlertSchema.index({ user: 1, createdAt: -1 });
 StockAlertSchema.index({ isTriggered: 1, symbol: 1 });
 
 export default mongoose.model<IStockAlert>('StockAlert', StockAlertSchema);
